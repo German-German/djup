@@ -15,3 +15,6 @@ spacy
 transformers
 torch
 sentencepiece
+lxml
+pytest
+pytest-httpx
