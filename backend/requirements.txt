@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+alembic
+pandas
+numpy
+httpx
+sec-edgar-downloader
+beautifulsoup4
+pdfplumber
+python-dotenv
+apscheduler
+spacy
+transformers
+torch
+sentencepiece
