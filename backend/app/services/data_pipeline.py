@@ -101,16 +101,27 @@ def ingest_bdc_filing(bdc_ticker: str, cik: str, db: Session) -> dict:
         db.rollback()
         logger.error(f"Error processing BDC {bdc_ticker}: {e}")
         try:
-            # We assume accession_number exists if we got an error after fetching
-            # If not, we just log a generic failure
-            registry = FilingRegistry(
-                bdc_ticker=bdc_ticker,
-                processing_status="failed",
-                error_message=str(e),
-                processed_at=datetime.now()
-            )
-            db.add(registry)
-            db.commit()
+            # Try to extract accession_number from filing_data if it exists
+            # to record the failure against a specific filing
+            accession = locals().get('accession_number')
+            
+            if accession:
+                registry = db.query(FilingRegistry).filter_by(accession_number=accession).first()
+                if not registry:
+                    registry = FilingRegistry(
+                        bdc_ticker=bdc_ticker,
+                        accession_number=accession,
+                        filing_date=locals().get('filing_date'),
+                    )
+                    db.add(registry)
+                
+                registry.processing_status = "failed"
+                registry.error_message = str(e)
+                registry.processed_at = datetime.now()
+                db.commit()
+            else:
+                # Generic failure record if we didn't even get to the filing data
+                pass
         except Exception as inner_e:
             db.rollback()
             logger.error(f"Failed to save error to registry: {inner_e}")

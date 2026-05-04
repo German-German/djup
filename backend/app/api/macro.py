@@ -25,17 +25,8 @@ def get_macro_overlay(
     Returns requested macro series values joined by date for overlay charts.
     """
     series_list = series.split(",")
-    mapping = {
-        "hy_spread": "BAMLH0A0HYM2",
-        "sofr": "SOFR",
-        "yield_curve": "T10Y2Y",
-        "cpi": "CPIAUCSL",
-        "ig_spread": "BAMLC0A0CM"
-    }
     
-    db_series_ids = [mapping.get(s, s) for s in series_list]
-    
-    query = db.query(MacroIndicator).filter(MacroIndicator.series_id.in_(db_series_ids))
+    query = db.query(MacroIndicator).filter(MacroIndicator.series_id.in_(series_list))
     
     if start_date:
         query = query.filter(MacroIndicator.date >= start_date)
@@ -44,20 +35,15 @@ def get_macro_overlay(
         
     records = query.order_by(MacroIndicator.date).all()
     
-    rev_map = {v: k for k, v in mapping.items()}
-    
     date_map = defaultdict(dict)
     for r in records:
-        if isinstance(r.date, str):
-            d_str = r.date
-        elif isinstance(r.date, datetime.date):
+        if isinstance(r.date, datetime.date):
             d_str = r.date.strftime("%Y-%m-%d")
         else:
             d_str = str(r.date)
             
-        nickname = rev_map.get(r.series_id, r.series_id)
         if r.value is not None:
-            date_map[d_str][nickname] = r.value
+            date_map[d_str][r.series_id] = r.value
             
     results = []
     for d, vals in date_map.items():

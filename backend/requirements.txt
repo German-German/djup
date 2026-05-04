@@ -18,3 +18,5 @@ sentencepiece
 lxml
 pytest
 pytest-httpx
+slowapi
+rich

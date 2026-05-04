@@ -102,3 +102,16 @@ class FilingRegistry(Base):
     error_message = Column(Text, nullable=True)
     processed_at = Column(DateTime)
     created_at = Column(DateTime, default=func.now())
+
+class RefreshLog(Base):
+    __tablename__ = "refresh_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    started_at = Column(DateTime, default=func.now())
+    completed_at = Column(DateTime, nullable=True)
+    status = Column(String(50)) # e.g. "running", "success", "failed"
+    bdcs_updated = Column(Text, nullable=True) # comma separated list
+    bdcs_failed = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    is_manual = Column(Boolean, default=False)
+
