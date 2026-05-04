@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { TrendingUp, BarChart3, PieChart as PieChartIcon, Search } from 'lucide-react';
+import { TrendingUp, BarChart3, PieChart as PieChartIcon, Search, Info } from 'lucide-react';
 import KPICard from '../components/ui/KPICard';
 import ChartPanel, { CustomTooltip } from '../components/ui/ChartPanel';
 import DataTable from '../components/ui/DataTable';
@@ -25,14 +25,14 @@ const YieldMonitorPage = () => {
   }, [yieldByBDC]);
 
   const bdcColumns = [
-    { header: 'BDC Ticker', accessorKey: 'ticker', cell: info => <span className="font-bold text-[var(--accent)]">{info.getValue()}</span> },
-    { header: 'Current Yield', accessorKey: 'yield', cell: info => <span className="font-mono">{info.getValue()}%</span> },
-    { header: 'Relative Rank', accessorKey: 'ticker', cell: (info) => {
+    { header: 'TICKER', accessorKey: 'ticker', cell: info => <span className="font-bold text-[#FCD535]">{info.getValue()}</span> },
+    { header: 'YIELD', accessorKey: 'yield', cell: info => <span className="font-mono text-[#EAECEF]">{info.getValue()}%</span> },
+    { header: 'PERCENTILE', accessorKey: 'ticker', cell: (info) => {
        const index = bdcYieldData.findIndex(d => d.ticker === info.getValue());
        const pct = ((bdcYieldData.length - index) / bdcYieldData.length) * 100;
        return (
-         <div className="w-24 h-1.5 bg-[#1E2D45] rounded-full overflow-hidden">
-           <div className="h-full bg-gradient-to-r from-[#8B5CF6] to-[#00C8E0]" style={{ width: `${pct}%` }} />
+         <div className="w-24 h-1 bg-[#2B2F36] rounded-full overflow-hidden">
+           <div className="h-full bg-[#0ECB81]" style={{ width: `${pct}%` }} />
          </div>
        );
     }}
@@ -49,55 +49,57 @@ const YieldMonitorPage = () => {
   }, [yieldTimeSeries]);
 
   return (
-    <div className="space-y-10">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <KPICard label="Universe Weighted Yield" value={overallYield} format="percent" icon={TrendingUp} accentColor="#00C8E0" />
-        <KPICard label="First Lien Avg" value={seriesData?.[0]?.first_lien} format="percent" icon={BarChart3} accentColor="#10B981" />
-        <KPICard label="Second Lien Avg" value={seriesData?.[0]?.second_lien} format="percent" icon={PieChartIcon} accentColor="#8B5CF6" />
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <KPICard label="UNIVERSE WEIGHTED YIELD" value={overallYield} format="percent" icon={TrendingUp} accentColor="#FCD535" delta={1.1} />
+        <KPICard label="FIRST LIEN AVERAGE" value={seriesData?.[0]?.first_lien} format="percent" icon={BarChart3} accentColor="#0ECB81" delta={0.5} />
+        <KPICard label="SECOND LIEN AVERAGE" value={seriesData?.[0]?.second_lien} format="percent" icon={PieChartIcon} accentColor="#8B5CF6" delta={-0.2} />
       </div>
 
-      <ChartPanel title="Yield Trends by Asset Class" subtitle="Spread performance across first lien, second lien, and unitranche loans" height={450}>
-        {tsLoading ? <LoadingSpinner /> : (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={seriesData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="quarter" axisLine={false} tickLine={false} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `${val}%`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend verticalAlign="top" align="right" height={40} />
-              <Line type="monotone" dataKey="first_lien" name="First Lien" stroke="#10B981" strokeWidth={3} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="unitranche" name="Unitranche" stroke="#00C8E0" strokeWidth={3} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="second_lien" name="Second Lien" stroke="#8B5CF6" strokeWidth={3} dot={{ r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </ChartPanel>
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12">
+          <ChartPanel title="Historical Yield Spreads" subtitle="Time-series analysis of asset class performance">
+            {tsLoading ? <LoadingSpinner /> : (
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={seriesData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2B2F36" />
+                  <XAxis dataKey="quarter" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `${val}%`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend verticalAlign="top" align="right" height={40} />
+                  <Line type="monotone" dataKey="first_lien" name="First Lien" stroke="#0ECB81" strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="unitranche" name="Unitranche" stroke="#32D7FF" strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="second_lien" name="Second Lien" stroke="#8B5CF6" strokeWidth={3} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </ChartPanel>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <ChartPanel title="BDC Yield Comparison" subtitle="Portfolio-wide weighted average yields by manager" height={400}>
-          {bdcLoading ? <LoadingSpinner /> : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={bdcYieldData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" hide />
-                <YAxis dataKey="ticker" type="category" axisLine={false} tickLine={false} width={60} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="val" name="Yield %" radius={[0, 4, 4, 0]}>
-                  {bdcYieldData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index < 3 ? '#00C8E0' : '#1E2D45'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </ChartPanel>
+        <div className="col-span-12 lg:col-span-6">
+          <ChartPanel title="Manager Performance Dispersion" subtitle="Weighted average yields by BDC manager">
+            {bdcLoading ? <LoadingSpinner /> : (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={bdcYieldData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#2B2F36" />
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="ticker" type="category" axisLine={false} tickLine={false} width={60} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="val" name="Yield %" radius={[0, 2, 2, 0]}>
+                    {bdcYieldData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index < 3 ? '#FCD535' : '#2B2F36'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </ChartPanel>
+        </div>
 
-        <div className="premium-card bg-[#0D1424]/20 overflow-hidden flex flex-col">
-          <div className="px-6 py-5 border-b border-[#1E2D45] bg-[#0D1424]/40 flex justify-between items-center">
-            <h3 className="font-['Outfit'] text-[15px] font-bold text-[#F8FAFC]">Manager Yield Ranking</h3>
-            <div className="p-1.5 bg-[#070B14] border border-[#1E2D45] rounded-lg text-[#475569]">
-              <Search className="w-3.5 h-3.5" />
-            </div>
+        <div className="col-span-12 lg:col-span-6 binance-panel overflow-hidden flex flex-col h-[480px]">
+          <div className="px-6 py-4 border-b border-[#2B2F36] flex justify-between items-center bg-[#1E2329]/50">
+            <h3 className="font-bold text-[14px] text-[#EAECEF] uppercase tracking-wider">Manager Yield Ranking</h3>
+            <Search className="w-4 h-4 text-[#474D57]" />
           </div>
           <div className="flex-1 overflow-y-auto">
             <DataTable data={bdcYieldData} columns={bdcColumns} loading={bdcLoading} />

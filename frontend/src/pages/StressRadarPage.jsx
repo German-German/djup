@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { AlertTriangle, TrendingUp, ShieldAlert, Zap, Layers } from 'lucide-react';
+import { ShieldAlert, Zap, Layers, AlertTriangle, Search } from 'lucide-react';
 import KPICard from '../components/ui/KPICard';
 import ChartPanel, { CustomTooltip } from '../components/ui/ChartPanel';
 import DataTable from '../components/ui/DataTable';
 import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import useApi from '../hooks/useApi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ComposedChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ComposedChart, Cell } from 'recharts';
 
 const StressRadarPage = () => {
   const { data: stressDashboard, loading: stressLoading } = useApi('/stress/dashboard');
@@ -27,69 +27,59 @@ const StressRadarPage = () => {
   }, [nonAccrualTrends]);
 
   const watchColumns = [
-    { header: 'Borrower', accessorKey: 'borrower_name', cell: info => <span className="font-bold text-[#F8FAFC]">{info.getValue()}</span> },
-    { header: 'Industry', accessorKey: 'industry', cell: info => <span className="text-[#64748B] text-xs">{info.getValue()}</span> },
-    { header: 'Lenders', accessorKey: 'bdc_count', cell: info => <span className="font-mono text-[var(--accent)]">{info.getValue()} BDCs</span> },
-    { header: 'Exposure', accessorKey: 'total_fair_value_mm', cell: info => `$${info.getValue().toFixed(1)}M` },
-    { header: 'Fair/Par', accessorKey: 'avg_fair_to_par', cell: info => (
+    { header: 'BORROWER', accessorKey: 'borrower_name', cell: info => <span className="font-bold text-[#EAECEF]">{info.getValue()}</span> },
+    { header: 'INDUSTRY', accessorKey: 'industry', cell: info => <span className="text-[#848E9C] text-xs uppercase">{info.getValue()}</span> },
+    { header: 'LENDERS', accessorKey: 'bdc_count', cell: info => <span className="font-mono text-[#FCD535]">{info.getValue()} BDCs</span> },
+    { header: 'EXPOSURE', accessorKey: 'total_fair_value_mm', cell: info => <span className="font-mono text-[#EAECEF]">${info.getValue().toFixed(1)}M</span> },
+    { header: 'FAIR/PAR', accessorKey: 'avg_fair_to_par', cell: info => (
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-1.5 bg-[#1E2D45] rounded-full overflow-hidden min-w-[60px]">
-          <div 
-            className={`h-full ${info.getValue() < 0.8 ? 'bg-[var(--negative)]' : 'bg-[var(--warning)]'}`} 
-            style={{ width: `${Math.min(100, info.getValue() * 100)}%` }} 
-          />
-        </div>
-        <span className="font-mono text-[10px] min-w-[35px]">{(info.getValue() * 100).toFixed(1)}%</span>
+        <span className={`font-mono text-[11px] min-w-[35px] ${info.getValue() < 0.8 ? 'text-[#F6465D]' : 'text-[#F0B90B]'}`}>
+          {(info.getValue() * 100).toFixed(1)}%
+        </span>
       </div>
     )},
-    { header: 'Status', accessorKey: 'is_non_accrual_any', cell: info => info.getValue() ? <Badge label="Non-Accrual" variant="non-accrual" /> : <Badge label="Watchlist" variant="loan-type" /> }
+    { header: 'STATUS', accessorKey: 'is_non_accrual_any', cell: info => info.getValue() ? <Badge label="NON-ACCRUAL" variant="non-accrual" /> : <Badge label="WATCHLIST" variant="status" /> }
   ];
 
   return (
-    <div className="space-y-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard label="Avg Non-Accrual" value={naRate.toFixed(2)} format="percent" icon={ShieldAlert} accentColor="#F43F5E" delta={0.2} deltaLabel="q/q change" />
-        <KPICard label="Distressed Exposure" value={distressedFV} format="currency" icon={Zap} accentColor="#F59E0B" />
-        <KPICard label="BDCs > 3% Non-Accrual" value={stressDashboard?.bdc_count_above_3pct} icon={AlertTriangle} accentColor="#F97316" />
-        <KPICard label="Worst Performer" value={worstBDC?.ticker || '-'} delta={worstBDC?.non_accrual_rate} deltaLabel="NA Rate" icon={Layers} accentColor="#8B5CF6" />
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KPICard label="UNIVERSE NON-ACCRUAL" value={naRate.toFixed(2)} format="percent" icon={ShieldAlert} accentColor="#F6465D" delta={0.2} />
+        <KPICard label="DISTRESSED EXPOSURE" value={distressedFV} format="currency" icon={Zap} accentColor="#FCD535" />
+        <KPICard label="BDC ALERTS (>3% NA)" value={stressDashboard?.bdc_count_above_3pct} icon={AlertTriangle} accentColor="#F0B90B" />
+        <KPICard label="BOTTOM PERFORMER" value={worstBDC?.ticker || '-'} delta={worstBDC?.non_accrual_rate} deltaLabel="NA Rate" icon={Layers} accentColor="#8B5CF6" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8">
-          <ChartPanel title="Universe Non-Accrual Trends" subtitle="Aggregate non-accrual rate across all monitored BDCs" height={400}>
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12 lg:col-span-8 h-[450px]">
+          <ChartPanel title="Aggregate Credit Deterioration" subtitle="Historical non-accrual trend line">
             {trendLoading ? <LoadingSpinner /> : (
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="quarter" axisLine={false} tickLine={false} dy={10} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2B2F36" />
+                  <XAxis dataKey="quarter" axisLine={false} tickLine={false} />
                   <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `${val}%`} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="universe_rate" name="Universe Avg" fill="url(#stressGradient)" radius={[4, 4, 0, 0]} />
-                  <Line type="monotone" dataKey="universe_rate" stroke="var(--negative)" strokeWidth={3} dot={{ r: 4, fill: 'var(--negative)' }} />
-                  <defs>
-                    <linearGradient id="stressGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--negative)" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="var(--negative)" stopOpacity={0.05}/>
-                    </linearGradient>
-                  </defs>
+                  <Bar dataKey="universe_rate" name="Universe Avg" fill="#F6465D" opacity={0.3} radius={[2, 2, 0, 0]} />
+                  <Line type="monotone" dataKey="universe_rate" stroke="#F6465D" strokeWidth={3} dot={{ r: 4, fill: '#F6465D' }} />
                 </ComposedChart>
               </ResponsiveContainer>
             )}
           </ChartPanel>
         </div>
         
-        <div className="lg:col-span-4">
-          <ChartPanel title="NAV Premium/Discount" subtitle="Market sentiment vs reported book value" height={400}>
+        <div className="col-span-12 lg:col-span-4 h-[450px]">
+          <ChartPanel title="NAV Premium History" subtitle="Market valuation of BDC equity vs book value">
             {navLoading ? <LoadingSpinner /> : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={navHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="quarter" axisLine={false} tickLine={false} dy={10} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2B2F36" />
+                  <XAxis dataKey="quarter" axisLine={false} tickLine={false} />
                   <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `${val}%`} />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="universe_avg_premium_discount" name="Avg Prem/Disc">
                     {navHistory?.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.universe_avg_premium_discount < 0 ? 'var(--negative)' : 'var(--positive)'} opacity={0.7} />
+                      <Cell key={`cell-${index}`} fill={entry.universe_avg_premium_discount < 0 ? '#F6465D' : '#0ECB81'} opacity={0.6} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -97,27 +87,30 @@ const StressRadarPage = () => {
             )}
           </ChartPanel>
         </div>
-      </div>
 
-      <div className="premium-card bg-[#0D1424]/20 overflow-hidden">
-        <div className="px-8 py-6 border-b border-[#1E2D45] flex justify-between items-center bg-[#0D1424]/40">
-          <div>
-            <h3 className="font-['Outfit'] text-[18px] font-bold text-[#F8FAFC]">Systemic Watchlist</h3>
-            <p className="text-[11px] text-[#64748B] uppercase tracking-widest mt-1 font-bold">Borrowers with exposure across 2+ BDCs or marked as non-accrual</p>
+        <div className="col-span-12 binance-panel overflow-hidden flex flex-col">
+          <div className="px-6 py-4 border-b border-[#2B2F36] flex justify-between items-center bg-[#1E2329]/50">
+            <div className="flex flex-col">
+               <h3 className="font-bold text-[14px] text-[#EAECEF] uppercase tracking-wider">Systemic Risk Registry</h3>
+               <span className="text-[10px] text-[#848E9C] font-bold">MONITORING CROSS-LENDER DEFAULTS</span>
+            </div>
+            <div className="flex items-center gap-3">
+               <div className="relative">
+                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#474D57]" />
+                 <input type="text" placeholder="SEARCH ASSET..." className="bg-[#0B0E11] border border-[#2B2F36] rounded px-8 py-1.5 text-xs text-[#EAECEF] focus:outline-none focus:border-[#FCD535]" />
+               </div>
+               <Badge label="HIGH ALERT" variant="non-accrual" />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-             <div className="text-[10px] text-[#475569] font-bold uppercase mr-2">Filter Status:</div>
-             <Badge label="All Alerts" variant="status" />
+          <div className="overflow-x-auto">
+            {watchLoading ? <LoadingSpinner /> : (
+              <DataTable 
+                data={watchlist || []} 
+                columns={watchColumns} 
+                loading={watchLoading}
+              />
+            )}
           </div>
-        </div>
-        <div className="overflow-x-auto">
-          {watchLoading ? <LoadingSpinner /> : (
-            <DataTable 
-              data={watchlist || []} 
-              columns={watchColumns} 
-              loading={watchLoading}
-            />
-          )}
         </div>
       </div>
     </div>

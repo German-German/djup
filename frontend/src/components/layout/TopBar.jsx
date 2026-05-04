@@ -1,17 +1,18 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { Bell, Search, User, Grid, Monitor, Cpu } from 'lucide-react';
 import useDashboardStore from '../../store/dashboardStore.js';
 
 const getPageTitle = (pathname) => {
   switch (pathname) {
-    case '/': return 'Global Overview';
-    case '/yields': return 'Yield Monitor';
-    case '/stress': return 'Stress Radar';
-    case '/dealflow': return 'Deal Flow';
-    case '/managers': return 'Manager Matrix';
+    case '/': return 'Market Intelligence';
+    case '/yields': return 'Yield Analytics';
+    case '/stress': return 'Risk Monitoring';
+    case '/dealflow': return 'Capital Deployment';
+    case '/managers': return 'Manager Ranking';
     case '/macro': return 'Macro Overlay';
-    case '/sentiment': return 'Sentiment (NLP)';
-    default: return 'Dashboard';
+    case '/sentiment': return 'NLP Insights';
+    default: return 'Terminal';
   }
 };
 
@@ -20,38 +21,42 @@ const TopBar = () => {
   const title = getPageTitle(location.pathname);
   const lastUpdated = useDashboardStore(state => state.lastUpdated);
 
-  let freshnessColor = 'bg-[#10B981]';
-  let statusText = 'Operational';
-  
-  if (lastUpdated) {
-    const daysOld = (new Date() - new Date(lastUpdated)) / (1000 * 60 * 60 * 24);
-    if (daysOld > 7) {
-      freshnessColor = 'bg-[#F59E0B]';
-      statusText = 'Data Delayed';
-    }
-  }
-
   return (
-    <header className="w-full h-20 glass-panel border-0 border-b border-[#1E2D45] flex items-center justify-between px-10 shrink-0 z-20">
-      <div className="flex flex-col">
-        <h1 className="text-xl font-bold text-[#F8FAFC] font-['Outfit'] tracking-tight">{title}</h1>
-        <div className="flex items-center gap-2 mt-1">
-          <div className="h-1 w-8 bg-[var(--accent)] rounded-full" />
-          <span className="text-[10px] text-[#64748B] uppercase tracking-[0.2em] font-bold">Terminal Interface</span>
+    <header className="h-16 bg-[#181A20] border-b border-[#2B2F36] flex items-center justify-between px-6 shrink-0 z-40">
+      <div className="flex items-center gap-6">
+        <h1 className="text-[18px] font-bold text-[#EAECEF] font-['Outfit']">{title}</h1>
+        <div className="h-4 w-[1px] bg-[#2B2F36]" />
+        <div className="flex items-center gap-2">
+          <Monitor className="w-4 h-4 text-[#848E9C]" />
+          <span className="text-[12px] font-mono text-[#848E9C]">v1.0.4-prod</span>
         </div>
       </div>
       
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-3 bg-[#070B14] border border-[#1E2D45] px-4 py-2 rounded-full">
-          <div className="relative flex h-2 w-2">
-            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${freshnessColor}`}></span>
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${freshnessColor}`}></span>
-          </div>
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[#94A3B8]">{statusText}</span>
+      <div className="flex items-center gap-4">
+        {/* Search Bar Placeholder */}
+        <div className="hidden lg:flex items-center gap-2 bg-[#0B0E11] border border-[#2B2F36] px-3 py-1.5 rounded w-[240px]">
+          <Search className="w-3.5 h-3.5 text-[#474D57]" />
+          <span className="text-[12px] text-[#474D57]">Search assets, managers...</span>
         </div>
-        
-        <div className="w-10 h-10 rounded-full bg-[#0D1424] border border-[#1E2D45] flex items-center justify-center text-[#64748B] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all cursor-pointer">
-          <div className="w-5 h-5 rounded bg-current opacity-20" />
+
+        <div className="flex items-center gap-1">
+          {[Grid, Bell, Cpu].map((Icon, i) => (
+            <button key={i} className="p-2 text-[#848E9C] hover:text-[#FCD535] hover:bg-[#2B2F36] rounded transition-all">
+              <Icon size={18} />
+            </button>
+          ))}
+        </div>
+
+        <div className="h-6 w-[1px] bg-[#2B2F36] mx-1" />
+
+        <div className="flex items-center gap-3 pl-2 group cursor-pointer">
+          <div className="flex flex-col items-end">
+            <span className="text-[12px] font-bold text-[#EAECEF] group-hover:text-[#FCD535]">Institutional Acc</span>
+            <span className="text-[10px] text-[#0ECB81] font-bold">Verified</span>
+          </div>
+          <div className="w-8 h-8 rounded bg-[#2B2F36] flex items-center justify-center text-[#FCD535]">
+            <User size={18} />
+          </div>
         </div>
       </div>
     </header>
