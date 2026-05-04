@@ -27,14 +27,14 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 # Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="CreditLens API", version="1.0.0")
+app = FastAPI(title="Djup API", version="1.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS Configuration
 ENVIRONMENT = os.getenv("ENV", "development")
 if ENVIRONMENT == "production":
-    allowed_origins = [os.getenv("FRONTEND_URL", "https://creditlens.vercel.app")]
+    allowed_origins = [os.getenv("FRONTEND_URL", "https://djup-api.vercel.app")]
 else:
     allowed_origins = ["*"]
 

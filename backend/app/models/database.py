@@ -41,6 +41,7 @@ class BDCSummary(Base):
     filing_date = Column(Date)
     quarter = Column(String(6))
     nav_per_share = Column(Float)
+    net_investment_income_per_share = Column(Float)
     stock_price = Column(Float)
     nav_premium_discount_pct = Column(Float)
     total_portfolio_fair_value = Column(Float)

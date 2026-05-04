@@ -16,14 +16,11 @@ const KPICard = ({ label, value, delta, deltaLabel, format, accentColor = '#00C8
 
   if (loading) {
     return (
-      <div 
-        className="bg-[#0D1424] border border-[#1E2D45] rounded-[10px] p-[20px_24px] relative overflow-hidden"
-        style={{ borderTop: `2px solid ${accentColor}` }}
-      >
-        <div className="animate-pulse flex flex-col gap-3">
-          <div className="h-3 bg-[#111827] rounded w-1/3"></div>
-          <div className="h-8 bg-[#111827] rounded w-1/2"></div>
-          <div className="h-4 bg-[#111827] rounded w-1/4 mt-2"></div>
+      <div className="premium-card p-6 relative overflow-hidden">
+        <div className="animate-pulse flex flex-col gap-4">
+          <div className="h-2.5 bg-[#1E2D45] rounded w-1/3"></div>
+          <div className="h-8 bg-[#1E2D45] rounded w-1/2"></div>
+          <div className="h-3 bg-[#1E2D45] rounded w-1/4"></div>
         </div>
       </div>
     );
@@ -33,41 +30,51 @@ const KPICard = ({ label, value, delta, deltaLabel, format, accentColor = '#00C8
   const isNegative = delta < 0;
 
   return (
-    <div 
-      className="bg-[#0D1424] border border-[#1E2D45] rounded-[10px] p-[20px_24px] relative flex flex-col justify-between"
-      style={{ borderTop: `2px solid ${accentColor}` }}
-    >
-      {Icon && (
-        <div className="absolute top-[20px] right-[24px] text-[#1E2D45]">
-          <Icon size={24} />
+    <div className="premium-card p-7 group relative flex flex-col justify-between hover:-translate-y-1 overflow-hidden">
+      {/* Accent Light */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[3px] opacity-80 group-hover:h-[4px] transition-all"
+        style={{ backgroundColor: accentColor, boxShadow: `0 0 12px ${accentColor}40` }}
+      />
+      
+      {/* Background Gradient */}
+      <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-transparent to-[#ffffff03] rounded-full pointer-events-none" />
+
+      <div className="flex justify-between items-start mb-6">
+        <div className="font-['DM_Sans'] text-[10px] uppercase tracking-[0.15em] text-[#64748B] font-bold">
+          {label}
         </div>
-      )}
-      
-      <div className="font-['DM_Sans'] text-[11px] uppercase tracking-[0.08em] text-[#8899AE] mb-2">
-        {label}
+        {Icon && (
+          <div className="p-2 rounded-lg bg-[#070B14] border border-[#1E2D45] text-[#94A3B8] group-hover:text-[var(--accent)] group-hover:border-[var(--accent)] transition-all">
+            <Icon size={18} strokeWidth={2.5} />
+          </div>
+        )}
       </div>
       
-      <div className="font-['JetBrains_Mono'] text-[28px] font-bold text-[#E8EDF5]">
-        {formatValue(value)}
-      </div>
-      
-      <div className="mt-3 flex items-center gap-2">
-        {delta !== null && delta !== undefined && (
-          <span 
-            className={`text-xs px-2 py-0.5 rounded-full font-['JetBrains_Mono'] ${
-              isPositive ? 'bg-[#10B98120] text-[#10B981]' : 
-              isNegative ? 'bg-[#F43F5E20] text-[#F43F5E]' : 
-              'bg-[#1E2D4580] text-[#8899AE]'
-            }`}
-          >
-            {isPositive ? '▲ +' : isNegative ? '▼ ' : ''}{Math.abs(delta)}{format === 'percent' || format === 'bps' ? '' : '%'}
-          </span>
-        )}
-        {deltaLabel && (
-          <span className="text-[10px] text-[#4A5A6B] font-['DM_Sans']">
-            {deltaLabel}
-          </span>
-        )}
+      <div className="flex flex-col gap-1.5">
+        <div className="font-['Outfit'] text-[32px] font-bold text-[#F8FAFC] tracking-tight">
+          {formatValue(value)}
+        </div>
+        
+        <div className="flex items-center gap-2.5">
+          {delta !== null && delta !== undefined && (
+            <div 
+              className={`flex items-center gap-1 text-[11px] font-bold font-mono px-2 py-0.5 rounded-md ${
+                isPositive ? 'bg-[#10B98115] text-[#10B981]' : 
+                isNegative ? 'bg-[#F43F5E15] text-[#F43F5E]' : 
+                'bg-[#1E2D45] text-[#64748B]'
+              }`}
+            >
+              <span className="text-[9px]">{isPositive ? '▲' : isNegative ? '▼' : '•'}</span>
+              <span>{Math.abs(delta)}{format === 'percent' || format === 'bps' ? '' : '%'}</span>
+            </div>
+          )}
+          {deltaLabel && (
+            <span className="text-[11px] text-[#475569] font-medium">
+              {deltaLabel}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
