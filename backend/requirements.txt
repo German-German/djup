@@ -18,5 +18,11 @@ sentencepiece
 lxml
 pytest
 pytest-httpx
+<<<<<<< HEAD
 slowapi
 rich
+=======
+shap
+prophet
+openai
+>>>>>>> 84a527c (Implement BDC Analytics suite: stress prediction, yield forecast, and AI commentary)
