@@ -12,9 +12,14 @@ from app.models.database import BDCLoan, MacroIndicator
 logger = logging.getLogger(__name__)
 
 def _get_quarter_end_date(quarter_str: str) -> datetime:
-    """Convert YYYYQ1/2/3/4 to an approximate quarter end date."""
-    year = int(quarter_str[:4])
-    q = quarter_str[-2:]
+    """Convert QX_YY or YYYYQ1/2/3/4 to an approximate quarter end date."""
+    if "_" in quarter_str:
+        q = quarter_str.split("_")[0]
+        year = 2000 + int(quarter_str.split("_")[1])
+    else:
+        year = int(quarter_str[:4])
+        q = quarter_str[-2:]
+
     if q == "Q1":
         return datetime(year, 3, 31)
     elif q == "Q2":
@@ -26,12 +31,22 @@ def _get_quarter_end_date(quarter_str: str) -> datetime:
     return datetime(year, 12, 31)
 
 def _get_next_quarter_str(quarter_str: str) -> str:
-    year = int(quarter_str[:4])
-    q = int(quarter_str[-1])
-    if q == 4:
-        return f"{year+1}Q1"
+    """Gets next quarter in QX_YY or YYYYQ1 format."""
+    if "_" in quarter_str:
+        q_part, y_part = quarter_str.split("_")
+        q = int(q_part[1])
+        y = int(y_part)
+        if q == 4:
+            return f"Q1_{y+1}"
+        else:
+            return f"Q{q+1}_{y}"
     else:
-        return f"{year}Q{q+1}"
+        year = int(quarter_str[:4])
+        q = int(quarter_str[-1])
+        if q == 4:
+            return f"{year+1}Q1"
+        else:
+            return f"{year}Q{q+1}"
 
 def get_yield_trends(db: Session) -> Dict[str, Any]:
     # 1. Fetch historical yields by quarter and loan type
@@ -108,7 +123,7 @@ def get_yield_trends(db: Session) -> Dict[str, Any]:
             changepoint_prior_scale=0.1,
             interval_width=0.80 # 80% confidence interval
         )
-        m.add_regressor('hy_spread')
+        # m.add_regressor('hy_spread')
         
         # Catch errors if data doesn't vary enough or is too small
         try:

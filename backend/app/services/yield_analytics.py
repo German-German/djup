@@ -98,6 +98,38 @@ def get_weighted_yield_overview(db: Session, quarter: str = None, bdc_tickers: l
         "total_fair_value_bn": total_fair_value / 1e9
     }
 
+def get_yield_by_bdc(db: Session, quarter: str = None) -> Dict[str, float]:
+    if not quarter:
+        quarter = _get_latest_quarter(db)
+        if not quarter:
+            return {}
+
+    loans = db.query(BDCLoan).filter(
+        BDCLoan.quarter == quarter,
+        func.lower(BDCLoan.loan_type) != "equity"
+    ).all()
+
+    bdc_data = {}
+    for l in loans:
+        ticker = l.bdc_ticker
+        if not ticker:
+            continue
+        if ticker not in bdc_data:
+            bdc_data[ticker] = {"fv": 0, "weighted_yield_num": 0}
+        
+        fv = l.fair_value or 0
+        bdc_data[ticker]["fv"] += fv
+        bdc_data[ticker]["weighted_yield_num"] += (l.interest_rate or 0) * fv
+
+    results = {}
+    for ticker, data in bdc_data.items():
+        if data["fv"] > 0:
+            results[ticker] = data["weighted_yield_num"] / data["fv"]
+        else:
+            results[ticker] = 0.0
+
+    return results
+
 def get_yield_time_series(db: Session, quarters: int = 8, bdc_tickers: list = None) -> List[Dict]:
     # Get last N quarters available
     distinct_quarters_q = db.query(BDCLoan.quarter).distinct().order_by(desc(BDCLoan.quarter))

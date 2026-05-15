@@ -44,6 +44,11 @@ class SpreadCurveResponse(BaseModel):
     avg_spread_bps: float
     loan_count: int
 
+@router.get("/by-bdc")
+def get_yield_by_bdc_route(quarter: Optional[str] = None, db: Session = Depends(get_db)):
+    """Returns overall weighted yield per BDC for the selected quarter."""
+    return yield_analytics.get_yield_by_bdc(db, quarter)
+
 @router.get("/overview", response_model=YieldOverviewResponse)
 def get_yield_overview(
     quarter: Optional[str] = None,

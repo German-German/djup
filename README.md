@@ -1,9 +1,9 @@
-# CreditLens (Djup)
+# Djup (Djup)
 
 Institutional-grade private credit intelligence platform.
 
 ## Overview
-CreditLens is a full-stack dashboard for monitoring Business Development Companies (BDCs), tracking yield compression, and analyzing loan-level stress in the private credit market.
+Djup is a full-stack dashboard for monitoring Business Development Companies (BDCs), tracking yield compression, and analyzing loan-level stress in the private credit market.
 
 ### Core Features
 - **Yield Monitor**: Real-time tracking of spreads and yields.

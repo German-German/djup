@@ -5,26 +5,26 @@
 @tailwind utilities;
 
 :root {
-  /* Binance-inspired Deep Palette */
-  --bg-main: #0B0E11;
-  --bg-card: #181A20;
-  --bg-hover: #2B2F36;
-  --border-dim: #2B2F36;
-  --border-bright: #474D57;
+  /* Charcoal/Slate Palette */
+  --bg-main: #121212;
+  --bg-card: #1E1E1E;
+  --bg-hover: #2D2D2D;
+  --border-dim: #333333;
+  --border-bright: #555555;
   
-  --text-primary: #EAECEF;
-  --text-secondary: #848E9C;
-  --text-muted: #474D57;
+  --text-primary: #F0F0F0;
+  --text-secondary: #A0A0A0;
+  --text-muted: #707070;
   
   /* Accent Colors */
-  --binance-yellow: #FCD535;
-  --success: #0ECB81;
-  --error: #F6465D;
-  --warning: #F0B90B;
+  --binance-yellow: #F59E0B; /* Replaced with Amber */
+  --success: #10B981;
+  --error: #EF4444;
+  --warning: #FCD34D;
   --info: #32D7FF;
   
-  --accent-glow: rgba(252, 213, 53, 0.1);
-  --success-glow: rgba(14, 203, 129, 0.1);
+  --accent-glow: rgba(245, 158, 11, 0.1);
+  --success-glow: rgba(16, 185, 129, 0.1);
 }
 
 body {
@@ -57,19 +57,19 @@ h1, h2, h3, h4, h5, h6 {
 .binance-panel {
   background-color: var(--bg-card);
   border: 1px solid var(--border-dim);
-  border-radius: 4px; /* Binance uses sharper corners */
+  border-radius: 12px; /* Softer, rounder corners */
 }
 
 .premium-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-dim);
-  border-radius: 8px;
+  border-radius: 16px;
   transition: all 0.2s ease;
 }
 
 .premium-card:hover {
-  border-color: var(--binance-yellow);
-  background-color: #1E2329;
+  border-color: var(--border-bright);
+  background-color: var(--bg-hover);
 }
 
 /* Bento Grid System */

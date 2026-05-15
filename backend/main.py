@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import logging
 import os
 import time
@@ -8,11 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-=======
-# FastAPI app entry point
-from fastapi import FastAPI
 from app.api import admin, predictions, forecast, commentary
->>>>>>> 84a527c (Implement BDC Analytics suite: stress prediction, yield forecast, and AI commentary)
 
 from app.database import engine, Base, SessionLocal
 from app.api import yields, stress, dealflow, managers, macro, sentiment
@@ -23,16 +18,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
 
-<<<<<<< HEAD
 # Configure basic logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-=======
-app.include_router(admin.router)
-app.include_router(predictions.router)
-app.include_router(forecast.router)
-app.include_router(commentary.router)
->>>>>>> 84a527c (Implement BDC Analytics suite: stress prediction, yield forecast, and AI commentary)
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
@@ -75,6 +63,10 @@ app.include_router(dealflow.router, prefix="/api/dealflow", tags=["Deal Flow"])
 app.include_router(managers.router, prefix="/api/managers", tags=["Managers"])
 app.include_router(macro.router, prefix="/api/macro", tags=["Macro"])
 app.include_router(sentiment.router, prefix="/api/sentiment", tags=["Sentiment"])
+app.include_router(admin.router)
+app.include_router(predictions.router)
+app.include_router(forecast.router)
+app.include_router(commentary.router)
 
 @app.on_event("startup")
 def startup_event():

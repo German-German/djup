@@ -22,13 +22,13 @@ export default {
           muted: 'var(--text-muted)',
         },
         accent: {
-          DEFAULT: 'var(--accent)',
-          violet: 'var(--accent-2)',
+          DEFAULT: '#F59E0B',
+          violet: '#8B5CF6',
         },
         status: {
-          positive: 'var(--positive)',
-          negative: 'var(--negative)',
-          warning: 'var(--warning)',
+          positive: '#10B981',
+          negative: '#EF4444',
+          warning: '#FCD34D',
         }
       }
     },

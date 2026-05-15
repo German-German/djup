@@ -10,7 +10,8 @@ import {
   Brain, 
   ChevronRight,
   ShieldCheck,
-  Zap
+  Zap,
+  Info
 } from 'lucide-react';
 import useDashboardStore from '../../store/dashboardStore.js';
 
@@ -25,21 +26,22 @@ const Sidebar = () => {
     { name: 'Manager Matrix', path: '/managers', icon: BarChart2 },
     { name: 'Macro Overlay', path: '/macro', icon: Globe },
     { name: 'NLP Sentiment', path: '/sentiment', icon: Brain },
+    { name: 'About Platform', path: '/about', icon: Info },
   ];
 
   return (
-    <div className="w-[240px] h-full bg-[#0B0E11] border-r border-[#2B2F36] flex flex-col flex-shrink-0 z-50">
+    <div className="w-[240px] h-full bg-[#121212] border-r border-[#333333] flex flex-col flex-shrink-0 z-50">
       {/* Brand Header */}
-      <div className="h-20 flex items-center px-6 border-b border-[#2B2F36]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-sm bg-[#FCD535] flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-black stroke-[2.5]" />
+      <div className="h-20 flex items-center px-6 border-b border-[#333333]">
+        <NavLink to="/" className="flex items-center gap-3 w-full group">
+          <div className="w-8 h-8 rounded-lg bg-[#F59E0B] flex items-center justify-center transition-transform group-hover:scale-105">
+            <ShieldCheck className="w-5 h-5 text-[#121212] stroke-[2.5]" />
           </div>
           <div className="flex flex-col">
-            <span className="font-['Outfit'] font-bold text-[20px] text-[#EAECEF] leading-tight">Djup</span>
-            <span className="text-[9px] text-[#FCD535] font-bold tracking-[0.2em] uppercase">Pro Terminal</span>
+            <span className="font-['Outfit'] font-bold text-[20px] text-[#F0F0F0] leading-tight">Djup</span>
+            <span className="text-[9px] text-[#F59E0B] font-bold tracking-[0.2em] uppercase">Pro Terminal</span>
           </div>
-        </div>
+        </NavLink>
       </div>
 
       {/* Navigation */}
@@ -54,10 +56,10 @@ const Sidebar = () => {
               key={link.name}
               to={link.path}
               className={({ isActive }) =>
-                `flex items-center group px-3 py-2.5 rounded transition-colors text-sm font-medium ` +
+                `flex items-center group px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ` +
                 (isActive
-                  ? 'bg-[#2B2F36] text-[#FCD535]'
-                  : 'text-[#848E9C] hover:text-[#EAECEF] hover:bg-[#1E2329]')
+                  ? 'bg-[#2D2D2D] text-[#F59E0B]'
+                  : 'text-[#A0A0A0] hover:text-[#F0F0F0] hover:bg-[#1E1E1E]')
               }
             >
               <Icon className="w-[18px] h-[18px] mr-3 shrink-0" />
@@ -69,12 +71,12 @@ const Sidebar = () => {
       </nav>
 
       {/* Footer Controls */}
-      <div className="p-4 border-t border-[#2B2F36] space-y-4 bg-[#0B0E11]">
+      <div className="p-4 border-t border-[#333333] space-y-4 bg-[#121212]">
         <div>
-          <label className="text-[10px] text-[#474D57] font-bold uppercase tracking-widest mb-2 block px-2">Data Horizon</label>
+          <label className="text-[10px] text-[#707070] font-bold uppercase tracking-widest mb-2 block px-2">Data Horizon</label>
           <div className="relative">
             <select 
-              className="w-full bg-[#181A20] border border-[#2B2F36] text-[#EAECEF] text-xs rounded px-3 py-2.5 appearance-none focus:outline-none focus:border-[#FCD535] cursor-pointer"
+              className="w-full bg-[#1E1E1E] border border-[#333333] text-[#F0F0F0] text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:border-[#F59E0B] cursor-pointer"
               value={selectedQuarter || ""}
               onChange={(e) => setQuarter(e.target.value || null)}
             >
@@ -92,10 +94,10 @@ const Sidebar = () => {
 
         <div className="px-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#0ECB81] animate-pulse" />
-            <span className="text-[10px] text-[#848E9C] font-medium uppercase">Network Live</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+            <span className="text-[10px] text-[#707070] font-medium uppercase">Network Live</span>
           </div>
-          <Zap className="w-3 h-3 text-[#FCD535] opacity-50" />
+          <Zap className="w-3 h-3 text-[#F59E0B] opacity-50" />
         </div>
       </div>
     </div>

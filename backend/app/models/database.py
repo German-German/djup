@@ -104,7 +104,6 @@ class FilingRegistry(Base):
     processed_at = Column(DateTime)
     created_at = Column(DateTime, default=func.now())
 
-<<<<<<< HEAD
 class RefreshLog(Base):
     __tablename__ = "refresh_logs"
 
@@ -117,7 +116,6 @@ class RefreshLog(Base):
     error_message = Column(Text, nullable=True)
     is_manual = Column(Boolean, default=False)
 
-=======
 class CommentaryLog(Base):
     __tablename__ = "commentary_log"
 
@@ -126,4 +124,3 @@ class CommentaryLog(Base):
     commentary_text = Column(Text, nullable=False)
     data_snapshot_json = Column(Text) # JSON string
     created_at = Column(DateTime, default=func.now())
->>>>>>> 84a527c (Implement BDC Analytics suite: stress prediction, yield forecast, and AI commentary)
