@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRight, Activity, Shield, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

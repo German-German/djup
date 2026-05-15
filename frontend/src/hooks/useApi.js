@@ -48,7 +48,11 @@ const useApi = (endpoint, initialFetch = true) => {
 
   useEffect(() => {
     if (initialFetch) {
-      fetchData();
+      // Use a microtask to avoid calling setState synchronously in the effect body
+      const timer = setTimeout(() => {
+        fetchData();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [fetchData, initialFetch]);
 

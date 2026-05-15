@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import KPICard from '../components/ui/KPICard';
 import ChartPanel from '../components/ui/ChartPanel';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -74,7 +74,7 @@ const D3Heatmap = ({ data }) => {
       .style("fill", function(d) { return myColor(d.score)} )
       .style("stroke-width", 1)
       .style("stroke", "#121212")
-      .on("mouseover", function(event, d) {
+      .on("mouseover", function() {
         tooltip.style("opacity", 1)
         d3.select(this).style("stroke", "#F59E0B").style("stroke-width", 2)
       })
@@ -85,7 +85,7 @@ const D3Heatmap = ({ data }) => {
           .style("left", (xPos + margin.left + 20) + "px")
           .style("top", (yPos + margin.top) + "px")
       })
-      .on("mouseleave", function(event, d) {
+      .on("mouseleave", function() {
         tooltip.style("opacity", 0)
         d3.select(this).style("stroke", "#121212").style("stroke-width", 1)
       })

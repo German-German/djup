@@ -1,4 +1,3 @@
-import React from 'react';
 import KPICard from '../components/ui/KPICard';
 import ChartPanel, { CustomTooltip } from '../components/ui/ChartPanel';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';

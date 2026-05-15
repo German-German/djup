@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { ShieldAlert, Zap, Layers, AlertTriangle, Search } from 'lucide-react';
 import KPICard from '../components/ui/KPICard';
 import ChartPanel, { CustomTooltip } from '../components/ui/ChartPanel';
@@ -6,10 +6,10 @@ import DataTable from '../components/ui/DataTable';
 import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import useApi from '../hooks/useApi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ComposedChart, Cell, PieChart, Pie } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart, Cell, PieChart, Pie } from 'recharts';
 
 const StressRadarPage = () => {
-  const { data: stressDashboard, loading: stressLoading } = useApi('/stress/dashboard');
+  const { data: stressDashboard } = useApi('/stress/dashboard');
   const { data: nonAccrualTrends, loading: trendLoading } = useApi('/stress/non-accrual');
   const { data: watchlist, loading: watchLoading } = useApi('/stress/watchlist');
   const { data: navHistory, loading: navLoading } = useApi('/stress/nav-premium');

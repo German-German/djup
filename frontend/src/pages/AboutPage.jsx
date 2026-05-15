@@ -1,5 +1,4 @@
-import React from 'react';
-import { LayoutDashboard, TrendingUp, AlertTriangle, Briefcase, Activity, Brain, Users } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, AlertTriangle, Activity, Brain, Users } from 'lucide-react';
 
 const AboutPage = () => {
   const features = [

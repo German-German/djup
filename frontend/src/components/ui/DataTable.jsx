@@ -1,17 +1,15 @@
-import React from 'react';
-
 const DataTable = ({ data, columns, loading }) => {
   if (loading) {
     return (
       <div className="w-full h-32 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#FCD535] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#F59E0B] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full h-32 flex items-center justify-center text-[#474D57] text-sm font-mono uppercase tracking-widest">
+      <div className="w-full h-32 flex items-center justify-center text-[#707070] text-sm font-mono uppercase tracking-widest">
         No records found in current universe
       </div>
     );

@@ -1,19 +1,13 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { 
   TrendingUp, 
   AlertTriangle, 
   Activity, 
   BarChart2, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Globe,
-  Info,
-  Maximize2,
   Bot,
   ChevronDown,
   ChevronUp,
-  Sparkles,
   Zap
 } from 'lucide-react';
 import KPICard from '../components/ui/KPICard';
@@ -24,20 +18,19 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { EmptyState } from '../components/ui/EmptyState';
 import useApi from '../hooks/useApi';
 import { 
-  BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, 
-  ReferenceLine, ComposedChart, Line
+  XAxis, YAxis, 
+  CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, 
+  ComposedChart, Line
 } from 'recharts';
 
 const OverviewPage = () => {
   const { data: yieldOverview, loading: yieldLoading } = useApi('/yields/overview');
-  const { data: stressDashboard, loading: stressLoading } = useApi('/stress/dashboard');
-  const { data: dealflowTrends, loading: dfLoading } = useApi('/dealflow/trends');
-  const { data: navPremium, loading: navLoading } = useApi('/stress/nav-premium');
+  const { data: stressDashboard } = useApi('/stress/dashboard');
+  const { data: dealflowTrends } = useApi('/dealflow/trends');
+  const { data: navPremium } = useApi('/stress/nav-premium');
   const { data: yieldTimeSeries, loading: tsLoading } = useApi('/yields/time-series');
-  const { data: fvDist, loading: fvLoading } = useApi('/stress/fair-value-dist');
-  const { data: watchlist, loading: watchLoading } = useApi('/stress/watchlist');
-  const { data: macroOverlay, loading: macroLoading } = useApi('/macro/overlay?series=hy_spread');
+  const { data: watchlist } = useApi('/stress/watchlist');
+  const { data: macroOverlay } = useApi('/macro/overlay?series=hy_spread');
 
   const [commentaryData, setCommentaryData] = useState(null);
   const [commentaryLoading, setCommentaryLoading] = useState(true);
@@ -82,16 +75,6 @@ const OverviewPage = () => {
     }));
   }, [yieldTimeSeries, macroOverlay]);
 
-  const donutData = useMemo(() => {
-    if (!fvDist) return [];
-    return Object.keys(fvDist).map(k => ({
-      name: k.replace('_', ' '),
-      value: fvDist[k].fair_value
-    })).filter(d => d.value > 0);
-  }, [fvDist]);
-
-  const COLORS = ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#32D7FF'];
-
   const watchColumns = [
     { header: 'ASSET', accessorKey: 'borrower_name', cell: info => <span className="font-bold text-[#F0F0F0]">{info.getValue()}</span> },
     { header: 'EXPOSURE', accessorKey: 'total_fair_value_mm', cell: info => <span className="font-mono text-[#F59E0B]">${info.getValue().toFixed(1)}M</span> },
@@ -109,7 +92,7 @@ const OverviewPage = () => {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-4">
         <LoadingSpinner />
-        <span className="text-sm font-mono text-[#848E9C]">SYNCHRONIZING GLOBAL UNIVERSE...</span>
+        <span className="text-sm font-mono text-[#A0A0A0]">SYNCHRONIZING GLOBAL UNIVERSE...</span>
       </div>
     );
   }
@@ -134,7 +117,6 @@ const OverviewPage = () => {
           format="percent" 
           icon={AlertTriangle} 
           accentColor="#EF4444" 
-          loading={stressLoading} 
           delta={-0.12} 
         />
         <KPICard 
@@ -143,7 +125,6 @@ const OverviewPage = () => {
           format="currency" 
           icon={Activity} 
           accentColor="#F59E0B" 
-          loading={dfLoading} 
         />
         <KPICard 
           label="NAV CONVERGENCE" 
@@ -151,7 +132,6 @@ const OverviewPage = () => {
           format="percent" 
           icon={BarChart2} 
           accentColor="#8B5CF6" 
-          loading={navLoading} 
         />
       </div>
 
@@ -185,8 +165,6 @@ const OverviewPage = () => {
           </ChartPanel>
         </div>
 
-
-
         {/* Watchlist Table */}
         <div className="col-span-12 h-[400px] binance-panel overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-[#333333] flex justify-between items-center bg-[#1E1E1E]">
@@ -196,11 +174,10 @@ const OverviewPage = () => {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {watchLoading ? <LoadingSpinner /> : watchlist?.length > 0 ? (
+            {watchlist?.length > 0 ? (
               <DataTable 
                 data={watchlist.slice(0, 8)} 
                 columns={watchColumns} 
-                loading={watchLoading}
               />
             ) : <EmptyState message="No watchlist data" />}
           </div>
@@ -209,7 +186,7 @@ const OverviewPage = () => {
         {/* AI Commentary Panel */}
         <div className="col-span-12 h-auto binance-panel overflow-hidden transition-all duration-300">
           <div 
-            className="px-5 py-4 border-b border-[#2B2F36] flex justify-between items-center bg-[#1E2329]/50 cursor-pointer hover:bg-[#2B2F36]/50 transition-colors"
+            className="px-5 py-4 border-b border-[#333333] flex justify-between items-center bg-[#1E1E1E]/50 cursor-pointer hover:bg-[#333333]/50 transition-colors"
             onClick={() => setCommentaryExpanded(!commentaryExpanded)}
           >
             <div className="flex items-center space-x-3">
@@ -218,40 +195,40 @@ const OverviewPage = () => {
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h3 className="font-bold text-[14px] text-[#EAECEF] uppercase tracking-wider flex items-center">
+                  <h3 className="font-bold text-[14px] text-[#F0F0F0] uppercase tracking-wider flex items-center">
                     AI Market Commentary
                   </h3>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#8B5CF6]/20 text-[#8B5CF6]">
-                    <Sparkles className="w-3 h-3 mr-1" />
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#8B5CF6]/20 text-[#8B5CF6]">
+                    <Bot className="w-3 h-3 mr-1" />
                     AI INSIGHT
                   </span>
                 </div>
-                <p className="text-[11px] text-[#848E9C] mt-0.5">
+                <p className="text-[11px] text-[#A0A0A0] mt-0.5">
                   {commentaryLoading ? "GENERATING INSIGHTS..." : `UPDATED ${formatDate(commentaryData?.date).toUpperCase()}`}
                 </p>
               </div>
             </div>
-            <button className="p-2 text-[#848E9C] hover:text-[#EAECEF] rounded-full">
+            <button className="p-2 text-[#A0A0A0] hover:text-[#F0F0F0] rounded-full">
               {commentaryExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </button>
           </div>
 
           {commentaryExpanded && (
-            <div className="p-6 bg-[#181A20]">
+            <div className="p-6 bg-[#121212]">
               {commentaryLoading ? (
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-[#2B2F36] rounded w-3/4"></div>
-                  <div className="h-4 bg-[#2B2F36] rounded w-full"></div>
-                  <div className="h-4 bg-[#2B2F36] rounded w-5/6"></div>
+                  <div className="h-4 bg-[#333333] rounded w-3/4"></div>
+                  <div className="h-4 bg-[#333333] rounded w-full"></div>
+                  <div className="h-4 bg-[#333333] rounded w-5/6"></div>
                 </div>
               ) : commentaryData ? (
-                <div className="prose prose-sm max-w-none text-[#EAECEF] leading-relaxed">
+                <div className="prose prose-sm max-w-none text-[#F0F0F0] leading-relaxed">
                   {commentaryData.commentary_text.split('\n').map((paragraph, idx) => (
-                    <p key={idx} className={paragraph.trim() ? "mb-4 text-[#848E9C]" : ""}>{paragraph}</p>
+                    <p key={idx} className={paragraph.trim() ? "mb-4 text-[#A0A0A0]" : ""}>{paragraph}</p>
                   ))}
                 </div>
               ) : (
-                <p className="text-[#848E9C] text-sm">Commentary is currently unavailable.</p>
+                <p className="text-[#A0A0A0] text-sm">Commentary is currently unavailable.</p>
               )}
             </div>
           )}

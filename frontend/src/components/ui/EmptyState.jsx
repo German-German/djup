@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Ghost } from 'lucide-react';
 
 export const EmptyState = ({ message = "No data available for this selection" }) => {

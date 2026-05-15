@@ -1,16 +1,15 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import axios from 'axios';
-import { TrendingUp, BarChart3, PieChart as PieChartIcon, Search, Info } from 'lucide-react';
+import { TrendingUp, BarChart3, PieChart as PieChartIcon, Search } from 'lucide-react';
 import KPICard from '../components/ui/KPICard';
 import ChartPanel, { CustomTooltip } from '../components/ui/ChartPanel';
 import DataTable from '../components/ui/DataTable';
-import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import useApi from '../hooks/useApi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, Cell, ComposedChart, Area } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, Cell } from 'recharts';
 
 const YieldMonitorPage = () => {
-  const { data: yieldOverview, loading: yieldLoading } = useApi('/yields/overview');
+  const { data: yieldOverview } = useApi('/yields/overview');
   const { data: yieldTimeSeries, loading: tsLoading } = useApi('/yields/time-series');
   const { data: yieldByBDC, loading: bdcLoading } = useApi('/yields/by-bdc');
 
@@ -42,7 +41,6 @@ const YieldMonitorPage = () => {
   
   const [showProjection, setShowProjection] = useState(false);
   const [trendData, setTrendData] = useState({});
-  const [trendLoading, setTrendLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -51,8 +49,6 @@ const YieldMonitorPage = () => {
         setTrendData(response.data);
       } catch (err) {
         console.error(err);
-      } finally {
-        setTrendLoading(false);
       }
     }
     fetchData();
@@ -91,16 +87,6 @@ const YieldMonitorPage = () => {
     
     return combined;
   }, [yieldTimeSeries, showProjection, trendData]);
-
-  const oldSeriesData = useMemo(() => {
-    if (!yieldTimeSeries) return [];
-    return yieldTimeSeries.map(d => ({
-      ...d,
-      first_lien: (d.first_lien_yield * 100).toFixed(2),
-      unitranche: (d.unitranche_yield * 100).toFixed(2),
-      second_lien: (d.second_lien_yield * 100).toFixed(2),
-    }));
-  }, [yieldTimeSeries]);
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
