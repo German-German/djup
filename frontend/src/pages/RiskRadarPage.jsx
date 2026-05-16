@@ -8,7 +8,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import useApi from '../hooks/useApi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart, Cell, PieChart, Pie } from 'recharts';
 
-const StressRadarPage = () => {
+const RiskRadarPage = () => {
   const { data: stressDashboard } = useApi('/stress/dashboard');
   const { data: nonAccrualTrends, loading: trendLoading } = useApi('/stress/non-accrual');
   const { data: watchlist, loading: watchLoading } = useApi('/stress/watchlist');
@@ -157,4 +157,5 @@ const StressRadarPage = () => {
   );
 };
 
-export default StressRadarPage;
+export default RiskRadarPage;
+

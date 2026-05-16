@@ -21,7 +21,7 @@ const Sidebar = () => {
   const navLinks = [
     { name: 'Market Overview', path: '/', icon: LayoutDashboard },
     { name: 'Yields & Spreads', path: '/yields', icon: TrendingUp },
-    { name: 'Risk Radar', path: '/stress', icon: AlertTriangle },
+    { name: 'Risk Radar', path: '/risk-radar', icon: AlertTriangle },
     { name: 'Deal Intelligence', path: '/dealflow', icon: Activity },
     { name: 'Manager Matrix', path: '/managers', icon: BarChart2 },
     { name: 'Macro Overlay', path: '/macro', icon: Globe },

@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/OverviewPage';
 import YieldMonitorPage from './pages/YieldMonitorPage';
-import StressRadarPage from './pages/StressRadarPage';
+import RiskRadarPage from './pages/RiskRadarPage';
 import DealFlowPage from './pages/DealFlowPage';
 import ManagerMatrixPage from './pages/ManagerMatrixPage';
 import MacroOverlayPage from './pages/MacroOverlayPage';
@@ -18,7 +18,7 @@ function App() {
           <Route path="/" element={<WelcomePage />} />
           <Route path="/overview" element={<OverviewPage />} />
           <Route path="/yields" element={<YieldMonitorPage />} />
-          <Route path="/stress" element={<StressRadarPage />} />
+          <Route path="/risk-radar" element={<RiskRadarPage />} />
           <Route path="/dealflow" element={<DealFlowPage />} />
           <Route path="/managers" element={<ManagerMatrixPage />} />
           <Route path="/macro" element={<MacroOverlayPage />} />
