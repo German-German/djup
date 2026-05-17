@@ -1,23 +1,35 @@
-const Badge = ({ label, variant = 'loan-type' }) => {
+import { Sparkles, Activity } from 'lucide-react';
+
+const Badge = ({ label, variant = 'loan-type', icon: Icon }) => {
   const getStyles = () => {
     switch (variant) {
       case 'non-accrual':
-        return 'bg-[#EF444420] text-[#EF4444] border-[#EF444440]';
+      case 'danger':
+        return 'bg-[rgba(255,107,107,0.1)] text-[var(--djup-red)] border-[var(--djup-red)]';
       case 'second-lien':
-        return 'bg-[#8B5CF620] text-[#8B5CF6] border-[#8B5CF640]';
+      case 'purple':
+        return 'bg-[rgba(180,92,255,0.1)] text-[var(--djup-purple)] border-[var(--djup-purple)]';
       case 'unitranche':
-        return 'bg-[#32D7FF20] text-[#32D7FF] border-[#32D7FF40]';
+      case 'info':
+        return 'bg-[rgba(0,229,255,0.1)] text-[var(--djup-cyan)] border-[var(--djup-cyan)]';
       case 'status':
-        return 'bg-[#F59E0B20] text-[#F59E0B] border-[#F59E0B40]';
+      case 'warning':
+      case 'primary':
+        return 'bg-[var(--djup-primary-soft)] text-[var(--djup-primary)] border-[var(--djup-primary)]';
+      case 'ai':
+        return 'bg-[rgba(180,92,255,0.1)] text-[var(--djup-purple)] border-[var(--djup-purple)]';
       default: // first-lien or performing
-        return 'bg-[#10B98120] text-[#10B981] border-[#10B98140]';
+        return 'bg-[rgba(0,255,138,0.1)] text-[var(--djup-green)] border-[var(--djup-green)]';
     }
   };
 
   return (
-    <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider border ${getStyles()}`}>
-      {label}
-    </span>
+    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] text-[10px] font-mono font-bold tracking-widest uppercase border border-opacity-30 ${getStyles()}`}>
+      {Icon && <Icon size={10} />}
+      {variant === 'ai' && !Icon && <Sparkles size={10} />}
+      {variant === 'live' && !Icon && <div className="w-1.5 h-1.5 rounded-full bg-[var(--djup-green)] animate-pulse" />}
+      <span>{label}</span>
+    </div>
   );
 };
 

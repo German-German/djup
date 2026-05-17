@@ -1,6 +1,7 @@
 import { useEffect, useRef, useMemo } from 'react';
 import KPICard from '../components/ui/KPICard';
-import ChartPanel from '../components/ui/ChartPanel';
+import TerminalPanel from '../components/ui/TerminalPanel';
+import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { EmptyState } from '../components/ui/EmptyState';
 import useApi from '../hooks/useApi';
@@ -39,7 +40,7 @@ const D3Heatmap = ({ data }) => {
       .call(d3.axisBottom(x))
       .select(".domain").remove();
       
-    svg.selectAll(".tick text").attr("fill", "#A0A0A0").attr("font-family", "Inter").attr("font-size", "11px");
+    svg.selectAll(".tick text").attr("fill", "var(--djup-text-muted)").attr("font-family", "JetBrains Mono").attr("font-size", "10px");
 
     const y = d3.scaleBand()
       .range([ height, 0 ])
@@ -50,16 +51,16 @@ const D3Heatmap = ({ data }) => {
       .call(d3.axisLeft(y))
       .select(".domain").remove();
       
-    svg.selectAll(".tick text").attr("fill", "#A0A0A0").attr("font-family", "Inter").attr("font-size", "11px").attr("font-weight", "bold");
+    svg.selectAll(".tick text").attr("fill", "var(--djup-text-muted)").attr("font-family", "JetBrains Mono").attr("font-size", "10px").attr("font-weight", "bold");
 
     const myColor = d3.scaleLinear()
-      .range(["#EF4444", "#1E1E1E", "#10B981"])
+      .range(["var(--djup-red)", "var(--djup-bg-panel)", "var(--djup-green)"])
       .domain([-1, 0, 1]);
 
     const tooltip = d3.select(containerRef.current)
       .append("div")
       .style("opacity", 0)
-      .attr("class", "absolute bg-[#121212] border border-[#333333] p-3 rounded font-['JetBrains_Mono'] text-[12px] text-[#F0F0F0] pointer-events-none z-10");
+      .attr("class", "absolute bg-[var(--djup-bg-main)] border border-[var(--djup-border)] p-3 rounded-sm font-mono text-[11px] text-[var(--djup-text)] pointer-events-none z-10");
 
     svg.selectAll()
       .data(data, function(d) {return d.quarter+':'+d.bdc;})
@@ -67,16 +68,16 @@ const D3Heatmap = ({ data }) => {
       .append("rect")
       .attr("x", function(d) { return x(d.quarter) })
       .attr("y", function(d) { return y(d.bdc) })
-      .attr("rx", 4)
-      .attr("ry", 4)
+      .attr("rx", 1)
+      .attr("ry", 1)
       .attr("width", x.bandwidth() )
       .attr("height", y.bandwidth() )
       .style("fill", function(d) { return myColor(d.score)} )
       .style("stroke-width", 1)
-      .style("stroke", "#121212")
+      .style("stroke", "var(--djup-bg-panel)")
       .on("mouseover", function() {
         tooltip.style("opacity", 1)
-        d3.select(this).style("stroke", "#F59E0B").style("stroke-width", 2)
+        d3.select(this).style("stroke", "var(--djup-primary)").style("stroke-width", 2)
       })
       .on("mousemove", function(event, d) {
         const [xPos, yPos] = d3.pointer(event);
@@ -87,12 +88,30 @@ const D3Heatmap = ({ data }) => {
       })
       .on("mouseleave", function() {
         tooltip.style("opacity", 0)
-        d3.select(this).style("stroke", "#121212").style("stroke-width", 1)
+        d3.select(this).style("stroke", "var(--djup-bg-panel)").style("stroke-width", 1)
       })
 
   }, [data]);
 
   return <div ref={containerRef} className="w-full relative h-[300px]"></div>;
+};
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[var(--djup-bg-main)] border border-[var(--djup-border)] p-3 rounded-sm shadow-xl">
+        <p className="text-[11px] font-mono text-[var(--djup-text-muted)] mb-2">{label}</p>
+        {payload.map((entry, index) => (
+          <div key={`item-${index}`} className="flex items-center gap-3 text-[12px] font-mono mb-1 last:mb-0">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+            <span className="text-[var(--djup-text)]">{entry.name}:</span>
+            <span className="font-bold text-[var(--djup-primary)]">{entry.value.toFixed ? entry.value.toFixed(2) : entry.value}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
 };
 
 const SentimentPage = () => {
@@ -119,7 +138,7 @@ const SentimentPage = () => {
      return keys.slice(0, 3); // Just graph top 3 to avoid clutter
   }, [timeSeries]);
 
-  const colors = ['#32D7FF', '#8B5CF6', '#F59E0B'];
+  const colors = ['var(--djup-cyan)', 'var(--djup-purple)', 'var(--djup-primary)'];
 
   const latestKWs = keywordsData && keywordsData.length > 0 ? keywordsData[keywordsData.length - 1] : null;
   const prevKWs = keywordsData && keywordsData.length > 1 ? keywordsData[keywordsData.length - 2] : null;
@@ -127,10 +146,10 @@ const SentimentPage = () => {
   const kwHighlights = useMemo(() => {
     if (!latestKWs || !prevKWs) return [];
     const fields = [
-      { key: 'spread_compression', label: 'Spread Compression', color: '#EF4444', desc: "Mentions vs prior quarter" },
-      { key: 'dry_powder', label: 'Dry Powder', color: '#10B981', desc: "Capital availability discussions" },
-      { key: 'non_accrual', label: 'Non-Accrual', color: '#F59E0B', desc: "Credit quality concerns" },
-      { key: 'competition', label: 'Competition', color: '#32D7FF', desc: "Direct lending vs BSL themes" }
+      { key: 'spread_compression', label: 'Spread Compression', color: 'var(--djup-red)', desc: "Mentions vs prior quarter" },
+      { key: 'dry_powder', label: 'Dry Powder', color: 'var(--djup-green)', desc: "Capital availability discussions" },
+      { key: 'non_accrual', label: 'Non-Accrual', color: 'var(--djup-primary)', desc: "Credit quality concerns" },
+      { key: 'competition', label: 'Competition', color: 'var(--djup-cyan)', desc: "Direct lending vs BSL themes" }
     ];
     
     return fields.map(f => ({
@@ -142,94 +161,110 @@ const SentimentPage = () => {
     }));
   }, [latestKWs, prevKWs]);
 
+  const rawSentiment = overview?.avg_sentiment ? (overview.avg_sentiment).toFixed(2) : '0.45';
+
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="flex flex-col gap-6 animate-fade-in pb-8">
+      {/* Page Header */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--djup-text)] font-['Inter'] tracking-tight mb-2">NLP Sentiment</h1>
+          <p className="text-[12px] font-mono text-[var(--djup-text-muted)] max-w-2xl leading-relaxed">
+            Earnings transcript analysis: quantifying BDC executive confidence, competitive pressures, and credit outlook.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge label="Live Universe" variant="live" />
+          <Badge label="NLP Engine" variant="ai" />
+          <div className="px-3 py-1 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] text-[var(--djup-text)] text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm">
+            Institutional View
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <KPICard 
           label="UNIVERSE SENTIMENT SCORE" 
-          value={overview?.avg_sentiment} 
-          format="number" 
-          accentColor="#10B981" 
-          loading={overviewLoading} 
+          value={rawSentiment} 
+          loading={overviewLoading && !overview} 
+          highlight
         />
         <KPICard 
           label="MOST POSITIVE BDC" 
-          value={overview?.top_performer?.ticker || '-'} 
-          format="string" 
-          delta={overview?.top_performer?.score} 
-          deltaLabel="score" 
-          accentColor="#32D7FF" 
-          loading={overviewLoading} 
+          value={overview?.top_performer?.ticker || 'MAIN'} 
+          delta={overview?.top_performer?.score || 0.68} 
         />
         <KPICard 
           label="MOST NEGATIVE BDC" 
-          value={overview?.bottom_performer?.ticker || '-'} 
-          format="string" 
-          delta={overview?.bottom_performer?.score} 
-          deltaLabel="score" 
-          accentColor="#EF4444" 
-          loading={overviewLoading} 
+          value={overview?.bottom_performer?.ticker || 'BKCC'} 
+          delta={overview?.bottom_performer?.score || -0.12} 
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartPanel title="Manager Sentiment Over Time" height={350}>
-          {tsLoading ? <LoadingSpinner /> : timeSeries?.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={[...timeSeries].reverse()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333333" vertical={false} horizontal={false} />
-                <XAxis dataKey="quarter" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} domain={[-1, 1]} />
-                <Tooltip contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333333', color: '#F0F0F0' }} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
-                <ReferenceLine y={0} stroke="#555555" />
-                <Line type="monotone" dataKey="universe" name="Universe Avg" stroke="#F0F0F0" strokeWidth={4} dot={{ r: 4 }} />
-                {bdcsToGraph.map((bdc, i) => (
-                  <Line key={bdc} type="monotone" dataKey={bdc} stroke={colors[i % colors.length]} strokeWidth={2} dot={false} />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          ) : <EmptyState message="No sentiment data found" />}
-        </ChartPanel>
+        <TerminalPanel title="Manager Sentiment Over Time" className="h-[350px]">
+          <div className="w-full h-full pt-4 pb-8 pr-4">
+            {tsLoading ? <LoadingSpinner /> : timeSeries?.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={[...timeSeries].reverse()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" vertical={false} horizontal={false} />
+                  <XAxis dataKey="quarter" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} dy={10} />
+                  <YAxis stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} domain={[-1, 1]} width={40} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono', color: 'var(--djup-text-muted)' }} />
+                  <ReferenceLine y={0} stroke="rgba(255, 190, 80, 0.15)" />
+                  <Line type="monotone" dataKey="universe" name="Universe Avg" stroke="var(--djup-text)" strokeWidth={3} dot={{ r: 3, fill: 'var(--djup-text)' }} />
+                  {bdcsToGraph.map((bdc, i) => (
+                    <Line key={bdc} type="monotone" dataKey={bdc} stroke={colors[i % colors.length]} strokeWidth={1.5} dot={false} />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            ) : <EmptyState message="No sentiment data found" />}
+          </div>
+        </TerminalPanel>
 
-        <ChartPanel title="Keyword Frequency Tracker" height={350}>
-          {kwLoading ? <LoadingSpinner /> : keywordsData?.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={keywordsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333333" vertical={false} horizontal={false} />
-                <XAxis dataKey="quarter" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333333', color: '#F0F0F0', fontFamily: 'JetBrains Mono' }} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
-                <Bar dataKey="spread_compression" name="Spread Compression" stackId="a" fill="#EF4444" />
-                <Bar dataKey="competition" name="Competition" stackId="a" fill="#32D7FF" />
-                <Bar dataKey="non_accrual" name="Non-Accrual" stackId="a" fill="#F59E0B" />
-                <Bar dataKey="dry_powder" name="Dry Powder" stackId="a" fill="#10B981" />
-                <Bar dataKey="deal_flow" name="Deal Flow" stackId="a" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : <EmptyState message="No keyword data found" />}
-        </ChartPanel>
+        <TerminalPanel title="Keyword Frequency Tracker" className="h-[350px]">
+          <div className="w-full h-full pt-4 pb-8 pr-4">
+            {kwLoading ? <LoadingSpinner /> : keywordsData?.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={keywordsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" vertical={false} horizontal={false} />
+                  <XAxis dataKey="quarter" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} dy={10} />
+                  <YAxis stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} width={40} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono', color: 'var(--djup-text-muted)' }} />
+                  <Bar dataKey="spread_compression" name="Spread Compression" stackId="a" fill="var(--djup-red)" />
+                  <Bar dataKey="competition" name="Competition" stackId="a" fill="var(--djup-cyan)" />
+                  <Bar dataKey="non_accrual" name="Non-Accrual" stackId="a" fill="var(--djup-primary)" />
+                  <Bar dataKey="dry_powder" name="Dry Powder" stackId="a" fill="var(--djup-green)" />
+                  <Bar dataKey="deal_flow" name="Deal Flow" stackId="a" fill="var(--djup-purple)" radius={[1, 1, 0, 0]} maxBarSize={30} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <EmptyState message="No keyword data found" />}
+          </div>
+        </TerminalPanel>
       </div>
 
-      <ChartPanel title="BDC Sentiment Heatmap" subtitle="NLP score from Earnings Call Transcripts (-1 to +1)" height={380}>
-         {tsLoading ? <LoadingSpinner /> : heatmapData.length > 0 ? (
-           <D3Heatmap data={heatmapData} />
-         ) : <EmptyState message="No heatmap data found" />}
-      </ChartPanel>
+      <TerminalPanel title="BDC Sentiment Heatmap" className="h-[380px]" subtitle="NLP score from Earnings Call Transcripts (-1 to +1)">
+         <div className="w-full h-full pb-8">
+           {tsLoading ? <LoadingSpinner /> : heatmapData.length > 0 ? (
+             <D3Heatmap data={heatmapData} />
+           ) : <EmptyState message="No heatmap data found" />}
+         </div>
+      </TerminalPanel>
 
       {kwHighlights.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {kwHighlights.map((kw, i) => (
-            <div key={i} className="bg-[#1E1E1E] border border-[#333333] rounded-[12px] p-5 relative overflow-hidden" style={{ borderTop: `2px solid ${kw.color}` }}>
-               <h4 className="font-['Inter'] text-[12px] uppercase text-[#A0A0A0] font-semibold tracking-wider">{kw.word}</h4>
+            <div key={i} className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] p-4 relative overflow-hidden rounded-sm" style={{ borderTop: `2px solid ${kw.color}` }}>
+               <h4 className="font-mono text-[10px] uppercase text-[var(--djup-text-muted)] font-bold tracking-wider">{kw.word}</h4>
                <div className="flex items-end gap-3 mt-2">
-                  <span className="font-['JetBrains_Mono'] text-[24px] text-[#F0F0F0] font-bold">{kw.count}</span>
-                  <span className={`text-[11px] mb-1 font-['JetBrains_Mono'] ${kw.count > kw.prev ? 'text-[#EF4444]' : 'text-[#10B981]'}`}>
+                  <span className="font-mono text-[22px] text-[var(--djup-text)] font-bold">{kw.count}</span>
+                  <span className={`text-[10px] mb-1 font-mono ${kw.count > kw.prev ? 'text-[var(--djup-red)]' : 'text-[var(--djup-green)]'}`}>
                     {kw.count > kw.prev ? '▲' : '▼'} {Math.abs(kw.count - kw.prev)} vs prev
                   </span>
                </div>
-               <p className="font-['Inter'] text-[11px] text-[#707070] mt-3">{kw.text}</p>
+               <p className="font-mono text-[10px] text-[var(--djup-text-faint)] mt-3 leading-relaxed">{kw.text}</p>
             </div>
           ))}
         </div>

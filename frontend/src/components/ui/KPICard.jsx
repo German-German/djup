@@ -1,48 +1,37 @@
 import { ArrowUpRight, ArrowDownRight, Minus, Loader2 } from 'lucide-react';
 
-const KPICard = ({ label, value, delta, deltaLabel, icon: Icon, format = 'number', loading = false, accentColor = '#F59E0B' }) => {
-  const formatValue = (val) => {
-    if (val === null || val === undefined) return '--';
-    if (format === 'percent') return `${val}%`;
-    if (format === 'currency') return `$${val}B`;
-    return val;
-  };
-
+const KPICard = ({ label, value, delta, loading = false, highlight = false }) => {
   const isPositive = delta > 0;
   const isNegative = delta < 0;
 
   return (
-    <div className="binance-panel p-4 flex flex-col relative overflow-hidden group hover:border-[#555555] transition-all">
-      <div className="flex justify-between items-start mb-2">
-        <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">{label}</span>
-        {Icon && <Icon size={16} style={{ color: accentColor }} className="opacity-60" />}
+    <div className={`bg-[var(--djup-bg-panel)] border ${highlight ? 'border-[var(--djup-primary)]' : 'border-[var(--djup-border)]'} rounded-sm p-4 flex flex-col relative`}>
+      <div className="mb-2">
+        <span className="text-[11px] font-mono text-[var(--djup-text-muted)] tracking-widest uppercase">{label}</span>
       </div>
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-baseline gap-3">
         {loading ? (
           <div className="h-8 flex items-center">
-            <Loader2 className="w-5 h-5 text-[#707070] animate-spin" />
+            <Loader2 className="w-5 h-5 text-[var(--djup-text-muted)] animate-spin" />
           </div>
         ) : (
-          <span className="text-[24px] font-bold text-[#F0F0F0] font-['JetBrains_Mono'] leading-none">
-            {formatValue(value)}
+          <span className="text-3xl font-bold text-[var(--djup-text)] font-mono leading-none tracking-tight">
+            {value}
           </span>
         )}
         
         {!loading && delta !== undefined && (
-          <div className={`flex items-center gap-0.5 mb-1 text-[12px] font-bold ${isPositive ? 'text-[#10B981]' : isNegative ? 'text-[#EF4444]' : 'text-[#A0A0A0]'}`}>
-            {isPositive ? <ArrowUpRight size={14} /> : isNegative ? <ArrowDownRight size={14} /> : <Minus size={14} />}
+          <div className={`flex items-center gap-0.5 text-[11px] font-mono font-bold tracking-wider ${isPositive ? 'text-[var(--djup-green)]' : isNegative ? 'text-[var(--djup-red)]' : 'text-[var(--djup-text-muted)]'}`}>
+            {isPositive ? <ArrowUpRight size={12} strokeWidth={3} /> : isNegative ? <ArrowDownRight size={12} strokeWidth={3} /> : <Minus size={12} strokeWidth={3} />}
             <span>{Math.abs(delta)}%</span>
           </div>
         )}
       </div>
 
-      <div className="mt-2 text-[10px] text-[#707070] font-bold uppercase tracking-widest">
-        {deltaLabel || '24H CHANGE'}
-      </div>
-      
-      {/* Subtle Bottom Accent */}
-      <div className="absolute bottom-0 left-0 h-[2px] bg-transparent group-hover:w-full transition-all duration-300" style={{ backgroundColor: accentColor, width: '20%' }} />
+      {highlight && (
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-[var(--djup-primary)]" />
+      )}
     </div>
   );
 };

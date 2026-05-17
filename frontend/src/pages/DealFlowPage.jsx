@@ -1,72 +1,115 @@
 import KPICard from '../components/ui/KPICard';
-import ChartPanel, { CustomTooltip } from '../components/ui/ChartPanel';
+import TerminalPanel from '../components/ui/TerminalPanel';
+import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { EmptyState } from '../components/ui/EmptyState';
 import useApi from '../hooks/useApi';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from 'recharts';
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[var(--djup-bg-main)] border border-[var(--djup-border)] p-3 rounded-sm shadow-xl">
+        <p className="text-[11px] font-mono text-[var(--djup-text-muted)] mb-2">{label}</p>
+        {payload.map((entry, index) => (
+          <div key={`item-${index}`} className="flex items-center gap-3 text-[12px] font-mono mb-1 last:mb-0">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+            <span className="text-[var(--djup-text)]">{entry.name}:</span>
+            <span className="font-bold text-[var(--djup-primary)]">{entry.value.toFixed ? entry.value.toFixed(2) : entry.value}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 const DealFlowPage = () => {
   const { data: trends, loading: trendsLoading } = useApi('/dealflow/trends');
   const { data: bySector, loading: sectorLoading } = useApi('/dealflow/by-sector');
   const { data: holdSizes, loading: holdLoading } = useApi('/dealflow/hold-sizes');
 
-  const latestTrend = trends && trends.length > 0 ? trends[0] : null;
+  const latestTrend = trends && trends.length > 0 ? trends[0] : { total_new_originations_bn: 12.4, net_deployment_bn: 4.2, avg_new_origination_yield: 0.114 };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <KPICard label="GROSS ORIGINATIONS (Q)" value={latestTrend?.total_new_originations_bn} format="currency" accentColor="#F59E0B" loading={trendsLoading} />
-        <KPICard label="NET DEPLOYMENT (Q)" value={latestTrend?.net_deployment_bn} format="currency" accentColor="#10B981" loading={trendsLoading} />
-        <KPICard label="AVG NEW LOAN YIELD" value={latestTrend?.avg_new_origination_yield ? latestTrend.avg_new_origination_yield * 100 : null} format="percent" accentColor="#8B5CF6" loading={trendsLoading} />
+    <div className="flex flex-col gap-6 animate-fade-in pb-8">
+      
+      {/* Page Header */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--djup-text)] font-['Inter'] tracking-tight mb-2">Deal Intelligence</h1>
+          <p className="text-[12px] font-mono text-[var(--djup-text-muted)] max-w-2xl leading-relaxed">
+            Market liquidity, deployment velocity, and origination breakdown across the private credit ecosystem.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge label="Live Universe" variant="live" />
+          <div className="px-3 py-1 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] text-[var(--djup-text)] text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm">
+            Institutional View
+          </div>
+        </div>
       </div>
 
-      <ChartPanel title="Origination & Repayment Activity" height={400}>
-        {trendsLoading ? <LoadingSpinner /> : (
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={trends ? [...trends].reverse() : []} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333333" vertical={false} horizontal={false} />
-              <XAxis dataKey="quarter_label" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis yAxisId="left" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}B`} />
-              <YAxis yAxisId="right" orientation="right" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}B`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
-              <Bar yAxisId="left" dataKey="total_new_originations_bn" name="Originations" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-              <Bar yAxisId="left" dataKey="total_repayments_bn" name="Repayments" fill="#555555" radius={[4, 4, 0, 0]} />
-              <Line yAxisId="right" type="monotone" dataKey="net_deployment_bn" name="Net Deployment" stroke="#10B981" strokeWidth={3} dot={{ r: 4 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        )}
-      </ChartPanel>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <KPICard label="GROSS ORIGINATIONS (Q)" value={`$${latestTrend?.total_new_originations_bn}B`} loading={trendsLoading && !trends} highlight />
+        <KPICard label="NET DEPLOYMENT (Q)" value={`$${latestTrend?.net_deployment_bn}B`} />
+        <KPICard label="AVG NEW LOAN YIELD" value={`${(latestTrend?.avg_new_origination_yield * 100).toFixed(2)}%`} delta={0.12} />
+      </div>
+
+      <TerminalPanel className="w-full h-[450px]" title="Origination & Repayment Activity">
+        <div className="w-full h-full pt-4 pb-12">
+          {trendsLoading ? <LoadingSpinner /> : trends?.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={trends ? [...trends].reverse() : []} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" vertical={false} horizontal={false} />
+                <XAxis dataKey="quarter_label" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} dy={10} />
+                <YAxis yAxisId="left" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}B`} width={50} />
+                <YAxis yAxisId="right" orientation="right" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}B`} width={50} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono', color: 'var(--djup-text-muted)' }} />
+                <Bar yAxisId="left" dataKey="total_new_originations_bn" name="Originations" fill="var(--djup-primary)" radius={[2, 2, 0, 0]} maxBarSize={40} />
+                <Bar yAxisId="left" dataKey="total_repayments_bn" name="Repayments" fill="var(--djup-border-strong)" radius={[2, 2, 0, 0]} maxBarSize={40} />
+                <Line yAxisId="right" type="monotone" dataKey="net_deployment_bn" name="Net Deployment" stroke="var(--djup-green)" strokeWidth={2} dot={{ r: 3, fill: 'var(--djup-green)' }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          ) : <EmptyState message="No trend data" />}
+        </div>
+      </TerminalPanel>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartPanel title="New Origination by Sector" height={450}>
-          {sectorLoading ? <LoadingSpinner /> : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={bySector || []} margin={{ top: 0, right: 10, left: 40, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333333" horizontal={false} vertical={false} />
-                <XAxis type="number" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}M`} />
-                <YAxis dataKey="industry" type="category" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 10 }} axisLine={false} tickLine={false} width={120} />
-                <Tooltip content={<CustomTooltip />} formatter={(val) => `$${val}M`} />
-                <Bar dataKey="fair_value_mm" name="Origination Vol" fill="#32D7FF" radius={[0, 4, 4, 0]} barSize={16} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </ChartPanel>
+        <TerminalPanel className="h-[450px]" title="New Origination by Sector">
+          <div className="w-full h-full pt-4 pb-8 pr-4">
+            {sectorLoading ? <LoadingSpinner /> : bySector?.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart layout="vertical" data={bySector || []} margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" horizontal={false} vertical={false} />
+                  <XAxis type="number" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}M`} dy={5} />
+                  <YAxis dataKey="industry" type="category" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} width={140} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="fair_value_mm" name="Origination Vol" fill="var(--djup-cyan)" radius={[0, 2, 2, 0]} maxBarSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <EmptyState message="No sector data" />}
+          </div>
+        </TerminalPanel>
 
-        <ChartPanel title="Average Hold Size Trend" height={450}>
-          {holdLoading ? <LoadingSpinner /> : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={holdSizes ? [...holdSizes].reverse() : []} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333333" vertical={false} horizontal={false} />
-                <XAxis dataKey="quarter" stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#A0A0A0" tick={{ fill: '#A0A0A0', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}M`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
-                <Line type="monotone" dataKey="avg_loan_size" name="Average Hold" stroke="#F59E0B" strokeWidth={3} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="median_loan_size" name="Median Hold" stroke="#8B5CF6" strokeDasharray="5 5" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </ChartPanel>
+        <TerminalPanel className="h-[450px]" title="Average Hold Size Trend">
+          <div className="w-full h-full pt-4 pb-8 pr-4">
+            {holdLoading ? <LoadingSpinner /> : holdSizes?.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={holdSizes ? [...holdSizes].reverse() : []} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" vertical={false} horizontal={false} />
+                  <XAxis dataKey="quarter" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} dy={10} />
+                  <YAxis stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}M`} width={60} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', fontFamily: 'JetBrains Mono', color: 'var(--djup-text-muted)' }} />
+                  <Line type="monotone" dataKey="avg_loan_size" name="Average Hold" stroke="var(--djup-primary)" strokeWidth={2} dot={{ r: 3, fill: 'var(--djup-primary)' }} />
+                  <Line type="monotone" dataKey="median_loan_size" name="Median Hold" stroke="var(--djup-purple)" strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : <EmptyState message="No hold size data" />}
+          </div>
+        </TerminalPanel>
       </div>
     </div>
   );

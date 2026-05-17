@@ -5,31 +5,32 @@
 @tailwind utilities;
 
 :root {
-  /* Charcoal/Slate Palette */
-  --bg-main: #121212;
-  --bg-card: #1E1E1E;
-  --bg-hover: #2D2D2D;
-  --border-dim: #333333;
-  --border-bright: #555555;
-  
-  --text-primary: #F0F0F0;
-  --text-secondary: #A0A0A0;
-  --text-muted: #707070;
-  
-  /* Accent Colors */
-  --binance-yellow: #F59E0B; /* Replaced with Amber */
-  --success: #10B981;
-  --error: #EF4444;
-  --warning: #FCD34D;
-  --info: #32D7FF;
-  
-  --accent-glow: rgba(245, 158, 11, 0.1);
-  --success-glow: rgba(16, 185, 129, 0.1);
+  /* Djup Pro Terminal Palette */
+  --djup-bg-outer: #1b1c20;
+  --djup-bg-main: #090806;
+  --djup-bg-sidebar: #100d07;
+  --djup-bg-panel: #14110b;
+  --djup-bg-panel-elevated: #1c1710;
+
+  --djup-border: rgba(255, 190, 80, 0.18);
+  --djup-border-strong: rgba(255, 190, 80, 0.35);
+
+  --djup-primary: #ffb800;
+  --djup-primary-soft: rgba(255, 184, 0, 0.12);
+
+  --djup-cyan: #00e5ff;
+  --djup-green: #00ff8a;
+  --djup-red: #ff6b6b;
+  --djup-purple: #b45cff;
+
+  --djup-text: #fff0d2;
+  --djup-text-muted: #b8a98b;
+  --djup-text-faint: #756a58;
 }
 
 body {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
+  background-color: var(--djup-bg-outer);
+  color: var(--djup-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -38,64 +39,75 @@ body {
 }
 
 ::selection {
-  background-color: var(--binance-yellow);
+  background-color: var(--djup-primary);
   color: #000000;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', sans-serif;
-  letter-spacing: -0.02em;
+  font-family: 'Inter', sans-serif; /* Moving away from rounded outfit to sharper Inter/Jetbrains */
+  letter-spacing: -0.01em;
   margin: 0;
-  color: var(--text-primary);
+  color: var(--djup-text);
 }
 
 .font-mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Glass & Panel Styles */
-.binance-panel {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-dim);
-  border-radius: 12px; /* Softer, rounder corners */
+/* Page Background */
+.djup-page-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px),
+    var(--djup-bg-outer);
+  background-size: 14px 14px;
+  padding: 16px; /* Adjust based on viewport */
 }
 
-.premium-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-dim);
-  border-radius: 16px;
-  transition: all 0.2s ease;
+/* Terminal Frame */
+.djup-terminal-frame {
+  background-color: var(--djup-bg-main);
+  border: 1px solid var(--djup-border-strong);
+  border-radius: 12px;
+  display: flex;
+  height: calc(100vh - 32px); /* Account for padding */
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-.premium-card:hover {
-  border-color: var(--border-bright);
-  background-color: var(--bg-hover);
+.djup-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-/* Bento Grid System */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
+.djup-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background-color: var(--djup-bg-main);
 }
 
-/* Custom Scrollbar - Binance Style */
+/* Reusable Components Global Overrides */
+
+/* Custom Scrollbar - Terminal Style */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-main);
+  background: var(--djup-bg-main);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-bright);
-  border-radius: 2px;
+  background: var(--djup-border);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: var(--djup-border-strong);
 }
 
 /* Table Enhancements */
@@ -106,39 +118,44 @@ table {
 }
 
 th {
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--djup-text-muted);
+  font-size: 11px;
+  font-weight: 600;
   text-align: left;
+  text-transform: uppercase;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-dim);
+  border-bottom: 1px solid var(--djup-border);
+  font-family: 'JetBrains Mono', monospace;
 }
 
 td {
   padding: 16px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--border-dim);
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 190, 80, 0.08);
   transition: background 0.1s ease;
+  color: var(--djup-text);
 }
 
 tr:hover td {
-  background-color: var(--bg-hover);
+  background-color: var(--djup-bg-panel);
 }
 
 /* Recharts Customizations */
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line {
-  stroke: var(--border-dim);
+  stroke: rgba(255, 190, 80, 0.08); /* Faint amber grid */
+  stroke-dasharray: 3 3;
 }
 
 .recharts-text {
   font-family: 'JetBrains Mono', monospace !important;
-  font-size: 11px !important;
-  fill: var(--text-secondary) !important;
+  font-size: 10px !important;
+  fill: var(--djup-text-muted) !important;
 }
 
 .recharts-tooltip-cursor {
-  stroke: var(--border-bright);
+  fill: rgba(255, 255, 255, 0.02) !important;
+  stroke: var(--djup-border);
 }
 
 /* Animations */

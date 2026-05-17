@@ -1,11 +1,11 @@
 import { useLocation } from 'react-router-dom';
-import { Bell, Search, User, Grid, Monitor, Cpu } from 'lucide-react';
+import { Bell, Search, User, Monitor, Info } from 'lucide-react';
 
 const getPageTitle = (pathname) => {
   switch (pathname) {
     case '/': return 'Market Intelligence';
     case '/yields': return 'Yield Analytics';
-    case '/stress': return 'Risk Monitoring';
+    case '/risk-radar': return 'Risk Monitoring';
     case '/dealflow': return 'Capital Deployment';
     case '/managers': return 'Manager Ranking';
     case '/macro': return 'Macro Overlay';
@@ -20,42 +20,46 @@ const TopBar = () => {
   const title = getPageTitle(location.pathname);
 
   return (
-    <header className="h-16 bg-[#121212] border-b border-[#333333] flex items-center justify-between px-6 shrink-0 z-40">
-      <div className="flex items-center gap-6">
-        <h1 className="text-[18px] font-bold text-[#F0F0F0] font-['Outfit']">{title}</h1>
-        <div className="h-4 w-[1px] bg-[#333333]" />
-        <div className="flex items-center gap-2">
-          <Monitor className="w-4 h-4 text-[#A0A0A0]" />
-          <span className="text-[12px] font-mono text-[#A0A0A0]">v1.0.4-prod</span>
+    <header className="h-12 bg-[var(--djup-bg-panel)] border-b border-[var(--djup-border)] flex items-center justify-between px-4 shrink-0 z-40">
+      <div className="flex items-center gap-4">
+        <h1 className="text-[16px] font-bold text-[var(--djup-text)] font-['Inter'] leading-none">{title}</h1>
+        <div className="h-4 w-[1px] bg-[var(--djup-border-strong)]" />
+        <div className="flex items-center bg-[var(--djup-bg-panel-elevated)] border border-[var(--djup-border)] px-2 py-0.5 rounded">
+          <span className="text-[10px] font-mono text-[var(--djup-text-muted)] tracking-wider">US_PRIVATE_CREDIT_V4.2</span>
+        </div>
+        
+        {/* Search Input */}
+        <div className="hidden lg:flex items-center gap-2 bg-[var(--djup-bg-main)] border border-[var(--djup-border)] px-2.5 py-1 rounded w-[280px] focus-within:border-[var(--djup-primary)] transition-colors">
+          <input 
+            type="text" 
+            placeholder="Search Markets..." 
+            className="bg-transparent border-none outline-none text-[12px] text-[var(--djup-text)] placeholder-[var(--djup-text-faint)] w-full font-mono"
+          />
+          <Search className="w-3 h-3 text-[var(--djup-text-muted)]" />
         </div>
       </div>
       
-      <div className="flex items-center gap-4">
-        {/* Search Bar Placeholder */}
-        <div className="hidden lg:flex items-center gap-2 bg-[#121212] border border-[#333333] px-3 py-1.5 rounded-lg w-[240px]">
-          <Search className="w-3.5 h-3.5 text-[#707070]" />
-          <span className="text-[12px] text-[#707070]">Search assets, managers...</span>
+      <div className="flex items-center gap-3">
+        {/* Icon Buttons */}
+        <div className="flex items-center gap-1.5">
+          <button className="p-1.5 text-[var(--djup-text-muted)] hover:text-[var(--djup-primary)] hover:bg-[var(--djup-bg-panel-elevated)] border border-transparent hover:border-[var(--djup-border)] rounded transition-all">
+            <Bell size={16} />
+          </button>
+          <button className="p-1.5 text-[var(--djup-text-muted)] hover:text-[var(--djup-primary)] hover:bg-[var(--djup-bg-panel-elevated)] border border-transparent hover:border-[var(--djup-border)] rounded transition-all">
+            <Monitor size={16} />
+          </button>
+          <button className="p-1.5 text-[var(--djup-text-muted)] hover:text-[var(--djup-primary)] hover:bg-[var(--djup-bg-panel-elevated)] border border-transparent hover:border-[var(--djup-border)] rounded transition-all">
+            <Info size={16} />
+          </button>
         </div>
 
-        <div className="flex items-center gap-1">
-          {[Grid, Bell, Cpu].map((Icon, i) => (
-            <button key={i} className="p-2 text-[#A0A0A0] hover:text-[#F59E0B] hover:bg-[#1E1E1E] rounded-lg transition-all">
-              <Icon size={18} />
-            </button>
-          ))}
-        </div>
+        <div className="h-4 w-[1px] bg-[var(--djup-border-strong)] mx-1" />
 
-        <div className="h-6 w-[1px] bg-[#333333] mx-1" />
-
-        <div className="flex items-center gap-3 pl-2 group cursor-pointer">
-          <div className="flex flex-col items-end">
-            <span className="text-[12px] font-bold text-[#F0F0F0] group-hover:text-[#F59E0B]">Institutional Acc</span>
-            <span className="text-[10px] text-[#10B981] font-bold">Verified</span>
-          </div>
-          <div className="w-8 h-8 rounded-lg bg-[#333333] flex items-center justify-center text-[#F59E0B]">
-            <User size={18} />
-          </div>
-        </div>
+        {/* Account Badge */}
+        <button className="flex items-center gap-2 px-2.5 py-1 bg-[var(--djup-bg-panel-elevated)] border border-[var(--djup-border)] hover:border-[var(--djup-primary)] rounded transition-colors group">
+          <div className="w-2 h-2 rounded-full bg-[var(--djup-primary)]" />
+          <span className="text-[11px] font-mono text-[var(--djup-text)] group-hover:text-[var(--djup-primary)] transition-colors">Institutional Account</span>
+        </button>
       </div>
     </header>
   );

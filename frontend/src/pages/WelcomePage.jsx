@@ -1,50 +1,56 @@
 import { ArrowRight, Activity, Shield, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Badge from '../components/ui/Badge';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] animate-fade-in px-4">
-      <div className="max-w-3xl text-center space-y-8">
+    <div className="flex flex-col items-center justify-center min-h-[85vh] animate-fade-in px-4">
+      <div className="max-w-4xl text-center space-y-6">
         
         <div className="space-y-4">
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#1E1E1E] border border-[#333333] text-[#F59E0B] text-xs font-bold tracking-wider mb-4">
-            DJUP PLATFORM V2.0
+          <div className="inline-flex items-center gap-2">
+            <Badge label="Active Terminal" variant="live" />
+            <div className="px-3 py-1 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] text-[var(--djup-text)] text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm">
+              DJUP PLATFORM v1.4.0-PRO
+            </div>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-[#F0F0F0]">
+          
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--djup-text)] font-['Inter'] max-w-3xl mx-auto">
             Institutional Intelligence for Private Credit.
           </h1>
-          <p className="text-lg md:text-xl text-[#A0A0A0] max-w-2xl mx-auto leading-relaxed">
-            Harness the power of AI-driven sentiment analysis, real-time yield monitoring, and predictive modeling to dominate the middle-market lending landscape.
+          
+          <p className="text-[12px] font-mono text-[var(--djup-text-muted)] max-w-2xl mx-auto leading-relaxed">
+            Harness the power of AI-driven NLP sentiment analysis, real-time yield monitoring, and predictive modeling to dominate the middle-market lending landscape.
           </p>
         </div>
 
-        <div className="pt-8 pb-12 flex justify-center">
+        <div className="pt-6 pb-10 flex justify-center">
           <button 
             onClick={() => navigate('/overview')}
-            className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-[#121212] bg-[#F59E0B] rounded-full overflow-hidden transition-all hover:bg-[#FCD34D] focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#121212]"
+            className="group relative inline-flex items-center justify-center px-8 py-3 text-[12px] font-mono font-bold uppercase tracking-wider text-[var(--djup-bg-main)] bg-[var(--djup-primary)] border border-[var(--djup-primary)] hover:bg-[var(--djup-primary-soft)] hover:text-[var(--djup-primary)] rounded-sm transition-all focus:outline-none shadow-lg shadow-amber-500/5 active:scale-[0.98]"
           >
-            <span>Launch Terminal</span>
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <span>Launch Pro Terminal</span>
+            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left pt-12 border-t border-[#333333]">
-          <div className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#333333] transition-colors hover:border-[#555555]">
-            <Activity className="w-8 h-8 text-[#F59E0B] mb-4" />
-            <h3 className="text-lg font-bold text-[#F0F0F0] mb-2">Yield Analytics</h3>
-            <p className="text-sm text-[#707070]">Track historical spreads, forecast trends, and analyze manager dispersion.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left pt-10 border-t border-[var(--djup-border)]">
+          <div className="p-5 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] rounded-sm hover:border-[var(--djup-primary)] transition-all">
+            <Activity className="w-6 h-6 text-[var(--djup-primary)] mb-4" />
+            <h3 className="text-[14px] font-bold text-[var(--djup-text)] mb-2 font-mono uppercase tracking-wider">Yield Analytics</h3>
+            <p className="text-[11px] text-[var(--djup-text-muted)] font-mono leading-relaxed">Track historical spreads, forecast trends, and analyze manager dispersion.</p>
           </div>
-          <div className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#333333] transition-colors hover:border-[#555555]">
-            <Brain className="w-8 h-8 text-[#8B5CF6] mb-4" />
-            <h3 className="text-lg font-bold text-[#F0F0F0] mb-2">NLP Insights</h3>
-            <p className="text-sm text-[#707070]">Process earnings transcripts with FinBERT to quantify market sentiment.</p>
+          <div className="p-5 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] rounded-sm hover:border-[var(--djup-purple)] transition-all">
+            <Brain className="w-6 h-6 text-[var(--djup-purple)] mb-4" />
+            <h3 className="text-[14px] font-bold text-[var(--djup-text)] mb-2 font-mono uppercase tracking-wider">NLP Insights</h3>
+            <p className="text-[11px] text-[var(--djup-text-muted)] font-mono leading-relaxed">Process earnings transcripts with FinBERT to quantify market sentiment.</p>
           </div>
-          <div className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#333333] transition-colors hover:border-[#555555]">
-            <Shield className="w-8 h-8 text-[#10B981] mb-4" />
-            <h3 className="text-lg font-bold text-[#F0F0F0] mb-2">Risk Radar</h3>
-            <p className="text-sm text-[#707070]">Monitor non-accruals, fair value distributions, and stress indicators.</p>
+          <div className="p-5 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] rounded-sm hover:border-[var(--djup-green)] transition-all">
+            <Shield className="w-6 h-6 text-[var(--djup-green)] mb-4" />
+            <h3 className="text-[14px] font-bold text-[var(--djup-text)] mb-2 font-mono uppercase tracking-wider">Risk Radar</h3>
+            <p className="text-[11px] text-[var(--djup-text-muted)] font-mono leading-relaxed">Monitor non-accruals, fair value distributions, and stress indicators.</p>
           </div>
         </div>
 
