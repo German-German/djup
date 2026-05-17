@@ -160,7 +160,7 @@ const BDCDeepDivePanel = ({ ticker, onClose }) => {
                <div className="divide-y divide-[var(--djup-border)]">
                   {data.top_10_positions?.slice(0,5).map((pos, i) => (
                     <div key={i} className="p-4 text-[12px] font-mono flex justify-between items-center hover:bg-[var(--djup-bg-panel-elevated)] transition-colors">
-                       <span className="text-[var(--djup-text)] font-medium truncate mr-4" title={pos.borrower_name}>{pos.borrower_name}</span>
+                       <span className="text-[var(--djup-text)] font-medium truncate mr-4" title={pos.borrower}>{pos.borrower}</span>
                        <span className="text-[var(--djup-primary)] font-bold">${pos.fair_value_mm?.toFixed(1)}M</span>
                     </div>
                   ))}

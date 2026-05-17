@@ -128,33 +128,34 @@ const YieldMonitorPage = () => {
       {/* Main Grid */}
       <div className="grid grid-cols-12 gap-4 h-[400px]">
         {/* Chart Panel */}
-        <TerminalPanel className="col-span-12 lg:col-span-8">
-          <div className="flex justify-between items-start mb-6 absolute top-4 left-4 right-4 z-10 pointer-events-none">
-            <h2 className="text-[16px] font-bold text-[var(--djup-text)] tracking-tight">Historical Yield Spreads</h2>
-            
-            <div className="flex items-center gap-6 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] px-4 py-2 rounded-sm pointer-events-auto">
+        <TerminalPanel 
+          className="col-span-12 lg:col-span-8"
+          title="Historical Yield Spreads"
+          source="SEC 10-Q & 10-K Filings | Status: Live"
+          action={
+            <div className="flex items-center gap-4 bg-[var(--djup-bg-panel-elevated)] px-2.5 py-1 rounded-sm border border-[var(--djup-border)]">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input type="checkbox" className="sr-only" checked={showProjection} onChange={() => setShowProjection(!showProjection)} />
                 <span className={`text-[10px] font-mono font-bold tracking-widest uppercase transition-colors ${showProjection ? 'text-[var(--djup-primary)]' : 'text-[var(--djup-text-muted)] group-hover:text-[var(--djup-text)]'}`}>
                   [AI Projection]
                 </span>
               </label>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-[2px] bg-[var(--djup-green)]" />
-                <span className="text-[10px] font-mono text-[var(--djup-text)]">First Lien</span>
+              <div className="h-3 w-[1px] bg-[var(--djup-border)]" />
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[var(--djup-green)]" />
+                <span className="text-[9px] font-mono text-[var(--djup-text)]">1st Lien</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-[2px] bg-[var(--djup-purple)]" />
-                <span className="text-[10px] font-mono text-[var(--djup-text)]">Second Lien</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[var(--djup-purple)]" />
+                <span className="text-[9px] font-mono text-[var(--djup-text)]">2nd Lien</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-[2px] bg-[var(--djup-cyan)]" />
-                <span className="text-[10px] font-mono text-[var(--djup-text)]">Unitranche</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[var(--djup-cyan)]" />
+                <span className="text-[9px] font-mono text-[var(--djup-text)]">Unitranche</span>
               </div>
             </div>
-          </div>
-          
+          }
+        >  
           <div className="w-full h-full pt-12">
             {tsLoading ? <LoadingSpinner /> : (
               <ResponsiveContainer width="100%" height="100%">
@@ -180,7 +181,7 @@ const YieldMonitorPage = () => {
         </TerminalPanel>
 
         {/* Snapshot Panel */}
-        <TerminalPanel className="col-span-12 lg:col-span-4" title="Current Spread Snapshot">
+        <TerminalPanel className="col-span-12 lg:col-span-4" title="Current Spread Snapshot" source="Source: SEC Filing Indexes">
           <div className="flex flex-col h-full gap-2">
             {[
               { label: 'First Lien', sub: 'Secured Senior', val: flYield, trend: 'up' },
@@ -216,15 +217,17 @@ const YieldMonitorPage = () => {
       {/* Bottom Grid */}
       <div className="grid grid-cols-12 gap-4 h-[280px]">
         {/* Manager Dispersion */}
-        <TerminalPanel className="col-span-12 lg:col-span-8 relative">
-          <div className="flex justify-between items-center absolute top-4 left-4 right-4 z-10 pointer-events-none">
-            <h2 className="text-[16px] font-bold text-[var(--djup-text)] tracking-tight">Manager Performance Dispersion</h2>
-            <div className="flex items-center gap-2 pointer-events-auto text-[var(--djup-text-muted)] hover:text-[var(--djup-text)] transition-colors cursor-pointer">
+        <TerminalPanel 
+          className="col-span-12 lg:col-span-8"
+          title="Manager Performance Dispersion"
+          source="Source: BDC Dispersions Engine"
+          action={
+            <div className="flex items-center gap-2 text-[var(--djup-text-muted)] hover:text-[var(--djup-text)] transition-colors cursor-pointer">
               <TrendingUp size={12} />
               <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Sort by Yield</span>
             </div>
-          </div>
-          
+          }
+        >
           <div className="w-full h-full pt-12 pb-2">
             {bdcLoading ? <LoadingSpinner /> : (
               <ResponsiveContainer width="100%" height="100%">
@@ -240,7 +243,7 @@ const YieldMonitorPage = () => {
         </TerminalPanel>
 
         {/* Universe Health */}
-        <TerminalPanel className="col-span-12 lg:col-span-4" title="Universe Health">
+        <TerminalPanel className="col-span-12 lg:col-span-4" title="Universe Health" source="Universe Diagnostics">
           <div className="flex flex-col h-full justify-between pb-2">
             
             <div className="grid grid-cols-2 gap-3 mt-2">

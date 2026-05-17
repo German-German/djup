@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import { marketDataService } from '../services/data/index.js';
 import { 
   TrendingUp, 
   AlertTriangle, 
@@ -49,10 +50,21 @@ const OverviewPage = () => {
   const { data: yieldTimeSeries, loading: tsLoading } = useApi('/yields/time-series');
   const { data: watchlist } = useApi('/stress/watchlist');
   const { data: macroOverlay } = useApi('/macro/overlay?series=hy_spread');
+  const { data: providerStatus } = useApi('/external/status');
 
   const [commentaryData, setCommentaryData] = useState(null);
   const [commentaryLoading, setCommentaryLoading] = useState(true);
   const [commentaryExpanded, setCommentaryExpanded] = useState(false);
+  const [marketQuotes, setMarketQuotes] = useState([]);
+
+  useEffect(() => {
+    async function loadQuotes() {
+      const tickers = ['ARCC', 'MAIN', 'BXSL', 'BX', 'APO', 'SPY', 'HYG', 'BKLN'];
+      const data = await marketDataService.getQuotes(tickers);
+      setMarketQuotes(data);
+    }
+    loadQuotes();
+  }, []);
 
   useEffect(() => {
     async function fetchCommentary() {
@@ -122,6 +134,29 @@ const OverviewPage = () => {
         </div>
       </div>
 
+      {/* Live Ticker Tape */}
+      <div className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] py-2 px-4 rounded-sm flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-none">
+        <span className="font-mono text-[10px] font-bold text-[var(--djup-primary)] border-r border-[var(--djup-border-strong)] pr-4 uppercase tracking-wider">LIVE MARKS</span>
+        <div className="flex items-center gap-6">
+          {marketQuotes && marketQuotes.length > 0 ? (
+            marketQuotes.map((q) => {
+              const isPos = q.changePercent >= 0;
+              return (
+                <div key={q.ticker} className="flex items-center gap-2 font-mono text-[11px]">
+                  <span className="font-bold text-[var(--djup-text)]">{q.ticker}</span>
+                  <span className="text-[var(--djup-text-muted)]">${q.price.toFixed(2)}</span>
+                  <span className={isPos ? 'text-emerald-400' : 'text-rose-400'}>
+                    {isPos ? '▲' : '▼'}{Math.abs(q.changePercent).toFixed(2)}%
+                  </span>
+                </div>
+              );
+            })
+          ) : (
+            <span className="font-mono text-[10px] text-[var(--djup-text-faint)] animate-pulse">CONNECTING DATA FEED...</span>
+          )}
+        </div>
+      </div>
+
       {/* KPI Ticker Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard 
@@ -151,12 +186,8 @@ const OverviewPage = () => {
       {/* Main Analysis Section */}
       <div className="grid grid-cols-12 gap-6">
         {/* Yield/Spread Chart */}
-        <TerminalPanel className="col-span-12 h-[450px] relative">
-          <div className="flex justify-between items-center absolute top-4 left-4 right-4 z-10 pointer-events-none">
-            <h2 className="text-[16px] font-bold text-[var(--djup-text)] tracking-tight">Yield Analytics & Spread Tracking</h2>
-          </div>
-
-          <div className="w-full h-full pt-12">
+        <TerminalPanel className="col-span-12 h-[450px]" title="Yield Analytics & Spread Tracking" source="Source: FRED & SEC Ingestions | Status: Live">
+          <div className="w-full h-full pt-4">
             {tsLoading && combinedTimeSeries.length === 0 ? <LoadingSpinner /> : combinedTimeSeries.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={combinedTimeSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -180,7 +211,7 @@ const OverviewPage = () => {
         </TerminalPanel>
 
         {/* Watchlist Table */}
-        <TerminalPanel className="col-span-12 lg:col-span-6 h-[400px]" title="Priority Risk Radar">
+        <TerminalPanel className="col-span-12 lg:col-span-6 h-[400px]" title="Priority Risk Radar" source="Source: BDC Stress Models">
           <div className="flex-1 overflow-y-auto h-full pb-8">
             {watchlist?.length > 0 ? (
               <DataTable 
@@ -233,6 +264,43 @@ const OverviewPage = () => {
              ) : (
                <EmptyState title="Synthesis Unavailable" description="Connect an AI provider to generate automated market commentary." />
              )}
+          </div>
+        </TerminalPanel>
+
+        {/* Data Source Status Panel */}
+        <TerminalPanel className="col-span-12 h-[200px]" title="Active Terminal Telemetry & Data Sourcing Pipeline">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-full py-2">
+            {providerStatus ? (
+              Object.entries(providerStatus).map(([key, value]) => {
+                const colors = {
+                  active: { border: 'border-emerald-500/30', bg: 'bg-emerald-500/10', text: 'text-emerald-400', badge: 'live' },
+                  cached: { border: 'border-amber-500/30', bg: 'bg-amber-500/10', text: 'text-amber-400', badge: 'warning' },
+                  unconfigured: { border: 'border-zinc-500/30', bg: 'bg-zinc-500/10', text: 'text-zinc-400', badge: 'second-lien' }
+                };
+                const theme = colors[value.status] || colors.unconfigured;
+
+                return (
+                  <div key={key} className={`border ${theme.border} ${theme.bg} p-3 rounded-sm flex flex-col justify-between h-[120px] transition-all hover:scale-[1.01]`}>
+                    <div className="flex justify-between items-start">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-[var(--djup-text-muted)]">{value.category}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${value.status === 'active' ? 'bg-emerald-400 animate-pulse' : value.status === 'cached' ? 'bg-amber-400' : 'bg-zinc-500'}`} />
+                    </div>
+                    <div>
+                      <h4 className="font-mono text-[12px] font-bold text-[var(--djup-text)] leading-tight">{value.sourceName}</h4>
+                      <p className="font-mono text-[9px] text-[var(--djup-text-faint)] leading-normal mt-1">{value.details}</p>
+                    </div>
+                    <div className="flex justify-between items-center mt-2 border-t border-[rgba(255,255,255,0.05)] pt-1.5">
+                      <span className="font-mono text-[8px] text-[var(--djup-text-faint)]">PROV: {value.provider}</span>
+                      <Badge label={value.status.toUpperCase()} variant={theme.badge} />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-5 flex justify-center items-center h-[120px]">
+                <LoadingSpinner />
+              </div>
+            )}
           </div>
         </TerminalPanel>
       </div>

@@ -161,3 +161,17 @@ def fetch_latest_filing(bdc_ticker: str, cik: str, already_processed: list[str])
         
     latest_filing['html_content'] = html_content
     return latest_filing
+
+def get_company_facts(cik: str) -> dict:
+    # Left pad cik to 10 digits
+    cik_padded = str(cik).zfill(10)
+    url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik_padded}.json"
+    
+    try:
+        response = httpx.get(url, headers=HEADERS)
+        response.raise_for_status()
+        time.sleep(0.15)
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error fetching company facts for CIK {cik}: {e}")
+        return {}
