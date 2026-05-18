@@ -32,7 +32,7 @@ const YieldMonitorPage = () => {
   const { data: yieldTimeSeries, loading: tsLoading } = useApi('/yields/time-series');
   const { data: yieldByBDC, loading: bdcLoading } = useApi('/yields/by-bdc');
 
-  const overallYield = yieldOverview?.overall_weighted_yield ? (yieldOverview.overall_weighted_yield * 100).toFixed(2) : '11.04';
+  const overallYield = yieldOverview?.overall_weighted_yield ? yieldOverview.overall_weighted_yield.toFixed(2) : '11.04';
   
   const bdcYieldData = useMemo(() => {
     if (!yieldByBDC) return [];
@@ -92,10 +92,11 @@ const YieldMonitorPage = () => {
     return combined;
   }, [yieldTimeSeries, showProjection, trendData]);
 
-  // Fallback data for exact mockup matching if API fails or is slow
-  const flYield = combinedSeriesData?.[0]?.first_lien || '10.32';
-  const slYield = combinedSeriesData?.[0]?.second_lien || '10.11';
-  const uniYield = combinedSeriesData?.[0]?.unitranche || '11.40';
+  // Snapshot uses the most recent historical row (before any AI projection rows)
+  const lastHistIdx = yieldTimeSeries && yieldTimeSeries.length > 0 ? yieldTimeSeries.length - 1 : 0;
+  const flYield = combinedSeriesData?.[lastHistIdx]?.first_lien || '10.32';
+  const slYield = combinedSeriesData?.[lastHistIdx]?.second_lien || '10.11';
+  const uniYield = combinedSeriesData?.[lastHistIdx]?.unitranche || '11.40';
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-8">

@@ -58,7 +58,7 @@ const MacroOverlayPage = () => {
         ig_spread: macroPt.values.ig_spread,
         sofr: macroPt.values.sofr,
         yield_curve: macroPt.values.yield_curve,
-        private_credit: yPt ? yPt.overall_yield * 100 : null
+        private_credit: yPt ? yPt.overall_yield : null
       };
     });
   }, [macroData, yieldsData]);

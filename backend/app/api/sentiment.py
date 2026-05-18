@@ -7,6 +7,10 @@ from app.services import nlp_service
 
 router = APIRouter()
 
+def _chrono_quarter_key(q):
+    """Sort key turning 'Q1_24' into '24_Q1' so years sort before quarter index."""
+    return f"{q[-2:]}_{q[:2]}" if q and len(q) >= 5 else (q or "")
+
 def get_db():
     db = SessionLocal()
     try:
@@ -19,12 +23,11 @@ def get_sentiment_overview(db: Session = Depends(get_db)):
     """
     Aggregated sentiment stats across all BDCs for the latest quarter.
     """
-    # Find latest quarter
-    latest_q = db.query(NLPSentiment.quarter).order_by(NLPSentiment.quarter.desc()).first()
-    if not latest_q:
+    # Find latest quarter (chronological, not string-desc)
+    all_quarters = [row[0] for row in db.query(NLPSentiment.quarter).distinct().all() if row[0]]
+    if not all_quarters:
         return {"avg_sentiment": 0, "bdc_count": 0}
-    
-    q = latest_q[0]
+    q = sorted(all_quarters, key=_chrono_quarter_key)[-1]
     stats = db.query(
         func.avg(NLPSentiment.net_sentiment_score).label("avg_score"),
         func.count(NLPSentiment.id).label("count")
@@ -62,7 +65,8 @@ def get_sentiment_time_series(db: Session = Depends(get_db)):
         scores = [v for k, v in data[q].items() if k != "quarter"]
         data[q]["universe"] = sum(scores) / len(scores) if scores else 0
         
-    return sorted(list(data.values()), key=lambda x: x["quarter"], reverse=True)[:8]
+    ordered = sorted(data.values(), key=lambda x: _chrono_quarter_key(x["quarter"]))
+    return ordered[-8:]
 
 @router.get("/keywords")
 def get_keyword_trends(db: Session = Depends(get_db)):
@@ -77,9 +81,9 @@ def get_keyword_trends(db: Session = Depends(get_db)):
         func.sum(NLPSentiment.keyword_non_accrual).label("non_accrual"),
         func.sum(NLPSentiment.keyword_origination).label("origination"),
         func.sum(NLPSentiment.keyword_competition).label("competition")
-    ).group_by(NLPSentiment.quarter).order_by(NLPSentiment.quarter.asc()).all()
-    
-    return [
+    ).group_by(NLPSentiment.quarter).all()
+
+    rows = [
         {
             "quarter": r.quarter,
             "spread_compression": r.spread_compression,
@@ -91,6 +95,7 @@ def get_keyword_trends(db: Session = Depends(get_db)):
         }
         for r in results
     ]
+    return sorted(rows, key=lambda x: _chrono_quarter_key(x["quarter"]))
 
 @router.post("/run")
 def trigger_sentiment_run(quarter: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):

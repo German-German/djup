@@ -3,45 +3,99 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 /**
- * Service to fetch market quotes and historical price charts for public managers, ETFs, and BDCs.
+ * Live market quotes via Yahoo Finance (server-proxied) and CoinGecko.
+ * The backend handles caching, batching, and fallbacks.
  */
 export const marketDataService = {
-  /**
-   * Fetches real-time price quotes for a specific ticker.
-   * @param {string} ticker
-   * @returns {Promise<MarketQuote>}
-   */
   getQuote: async (ticker) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/external/market/quote/${ticker}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Market Data Service Error for ticker ${ticker}:`, error);
+      const { data } = await axios.get(`${API_BASE_URL}/markets/quote/${ticker}`);
+      return data;
+    } catch (e) {
+      console.warn(`marketDataService.getQuote(${ticker}) failed`, e);
       return {
         ticker: ticker.toUpperCase(),
-        price: 15.00,
-        change: 0.0,
-        changePercent: 0.0,
-        volume: 50000,
-        marketCap: 1000000000,
-        source: 'Fallback System',
-        fetchedAt: new Date().toISOString()
+        price: 0,
+        change: 0,
+        changePercent: 0,
+        source: 'unavailable',
       };
     }
   },
 
-  /**
-   * Batch fetches quotes for a list of tickers.
-   * @param {string[]} tickers
-   * @returns {Promise<MarketQuote[]>}
-   */
   getQuotes: async (tickers) => {
+    if (!tickers || tickers.length === 0) return [];
     try {
-      const promises = tickers.map(t => marketDataService.getQuote(t));
-      return await Promise.all(promises);
-    } catch (error) {
-      console.error("Batch market quotes fetch failed:", error);
+      const { data } = await axios.get(`${API_BASE_URL}/markets/quotes`, {
+        params: { tickers: tickers.join(',') },
+      });
+      return Array.isArray(data) ? data.filter((q) => !q.error) : [];
+    } catch (e) {
+      console.warn('marketDataService.getQuotes failed', e);
       return [];
     }
-  }
+  },
+
+  getHistory: async (ticker, range = '1mo', interval = '1d') => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/markets/history/${ticker}`, {
+        params: { range, interval },
+      });
+      return data;
+    } catch (e) {
+      console.warn(`marketDataService.getHistory(${ticker}) failed`, e);
+      return { ticker, bars: [], source: 'unavailable' };
+    }
+  },
+};
+
+export const cryptoService = {
+  getQuotes: async (ids = ['bitcoin', 'ethereum', 'solana']) => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/crypto/quotes`, {
+        params: { ids: ids.join(',') },
+      });
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      console.warn('cryptoService.getQuotes failed', e);
+      return [];
+    }
+  },
+};
+
+export const fxService = {
+  getLatest: async (base = 'USD', symbols = ['EUR', 'GBP', 'JPY', 'CHF']) => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/fx/latest`, {
+        params: { base, symbols: symbols.join(',') },
+      });
+      return data;
+    } catch (e) {
+      console.warn('fxService.getLatest failed', e);
+      return { base, rates: {}, source: 'unavailable' };
+    }
+  },
+};
+
+export const macroLiveService = {
+  getSnapshot: async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/macro/snapshot`);
+      return data;
+    } catch (e) {
+      console.warn('macroLiveService.getSnapshot failed', e);
+      return {};
+    }
+  },
+  getOverlay: async (series, months = 18) => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/macro/live`, {
+        params: { series: series.join(','), months },
+      });
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      console.warn('macroLiveService.getOverlay failed', e);
+      return [];
+    }
+  },
 };

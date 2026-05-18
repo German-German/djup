@@ -167,7 +167,7 @@ const BDCDeepDivePanel = ({ ticker, onClose }) => {
                </div>
             </div>
             
-            <a href={`https://www.sec.gov/edgar/search/#/q=${ticker}&force=true`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-3 bg-[var(--djup-primary)] hover:bg-[var(--djup-primary-soft)] hover:text-[var(--djup-primary)] text-[var(--djup-bg-main)] font-mono font-bold text-[12px] border border-[var(--djup-primary)] rounded-sm transition-all shadow-lg shadow-amber-500/5 active:scale-[0.98]">
+            <a href={`https://www.sec.gov/edgar/search/#/q=${ticker}&force=true`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-2.5 bg-[var(--djup-primary)] hover:bg-[var(--djup-primary-strong)] text-[var(--djup-bg-main)] font-mono font-semibold text-[11px] tracking-[0.15em] uppercase border border-[var(--djup-primary)] transition-colors" style={{ borderRadius: 0 }}>
               <ExternalLink size={14} /> View SEC EDGAR Filings
             </a>
           </div>

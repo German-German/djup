@@ -8,13 +8,20 @@ from app.models.database import BDCLoan, BDCSummary
 logger = logging.getLogger(__name__)
 
 def _get_latest_quarter(db: Session) -> str:
-    result = db.query(BDCLoan.quarter).order_by(desc(BDCLoan.quarter)).first()
-    return result[0] if result and result[0] else None
+    rows = [r[0] for r in db.query(BDCLoan.quarter).distinct().all() if r[0]]
+    if not rows:
+        return None
+    # Chronological max ("Q3_24" -> "24_Q3" sorts after "23_Q4")
+    return max(rows, key=lambda q: f"{q[-2:]}_{q[:2]}" if len(q) >= 5 else q)
+
+def _chrono_quarter_key(q: str) -> str:
+    """Sort key turning 'Q1_24' into '24_Q1' so years sort before quarter index."""
+    return f"{q[-2:]}_{q[:2]}" if q and len(q) >= 5 else (q or "")
 
 def get_non_accrual_trends(db: Session, quarters: int = 8) -> List[Dict]:
     distinct_quarters = db.query(BDCSummary.quarter).distinct().order_by(desc(BDCSummary.quarter)).limit(quarters).all()
     recent_quarters = [q[0] for q in distinct_quarters if q[0]]
-    recent_quarters.sort()
+    recent_quarters.sort(key=_chrono_quarter_key)
 
     results = []
     for q in recent_quarters:
@@ -168,8 +175,8 @@ def get_watchlist_borrowers(db: Session, min_bdc_appearances: int = 2) -> List[D
     return watchlist
 
 def get_nav_premium_history(db: Session) -> List[Dict]:
-    distinct_quarters = db.query(BDCSummary.quarter).distinct().order_by(BDCSummary.quarter).all()
-    quarters = [q[0] for q in distinct_quarters if q[0]]
+    distinct_quarters = db.query(BDCSummary.quarter).distinct().all()
+    quarters = sorted([q[0] for q in distinct_quarters if q[0]], key=_chrono_quarter_key)
     
     results = []
     for q in quarters:
