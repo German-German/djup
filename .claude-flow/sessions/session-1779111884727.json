@@ -1,0 +1,14 @@
+{
+  "id": "session-1779111884727",
+  "startedAt": "2026-05-18T13:44:44.727Z",
+  "cwd": "/Users/jermainennn/Desktop/summer-project",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-05-18T13:44:44.973Z",
+  "duration": 247
+}
