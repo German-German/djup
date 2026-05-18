@@ -17,49 +17,70 @@ def get_external_status(db: Session = Depends(get_db)):
     """Returns the configuration status and health of all connected data providers."""
     sec_ua = os.getenv("SEC_USER_AGENT")
     fred_key = os.getenv("FRED_API_KEY")
-    fmp_key = os.getenv("FMP_API_KEY")
+    newsapi_key = os.getenv("NEWSAPI_KEY") or os.getenv("NEWS_API_KEY")
     gnews_key = os.getenv("GNEWS_API_KEY")
-    
-    # Calculate simple diagnostic checks
+    guardian_key = os.getenv("GUARDIAN_API_KEY")
+
     bdc_count = db.query(BDCCompany).count()
     sentiment_count = db.query(NLPSentiment).count()
-    
+
+    news_provider = (
+        "newsapi" if newsapi_key
+        else "gnews" if gnews_key
+        else "guardian" if guardian_key
+        else "none"
+    )
+
     return {
         "sec": {
             "provider": "sec-edgar",
             "category": "Filings & XBRL Facts",
             "status": "active" if sec_ua else "cached",
             "sourceName": "SEC EDGAR Submissions API",
-            "details": f"Monitoring {bdc_count} BDC CIKs"
+            "details": f"Monitoring {bdc_count} BDC CIKs",
         },
         "macro": {
             "provider": "fred",
             "category": "Macroeconomic Indicators",
             "status": "active" if fred_key else "cached",
-            "sourceName": "FRED St. Louis Fed API",
-            "details": "Active series: SOFR, Treasury Yields, HY Spreads"
+            "sourceName": "FRED · St. Louis Fed",
+            "details": "Live series: SOFR, UST, HY/IG OAS, CPI",
         },
         "marketData": {
-            "provider": "fmp",
-            "category": "Public Equity & ETF Prices",
-            "status": "active" if fmp_key else "unconfigured",
-            "sourceName": "Financial Modeling Prep API",
-            "details": "Requires FMP_API_KEY for live quotes. Falling back to cached fundamentals."
+            "provider": "yahoo",
+            "category": "Public Equity & ETF Quotes",
+            "status": "active",
+            "sourceName": "Yahoo Finance v8",
+            "details": "Live quotes + 1d/5d/1mo/1y history (no key required)",
         },
-        "privateEquity": {
-            "provider": "premium-provider-required",
-            "category": "PE Deal Intelligence & Multiples",
-            "status": "unconfigured",
-            "sourceName": "FactSet / ION PE Data",
-            "details": "Premium subscription required. Displaying placeholder intelligence."
+        "crypto": {
+            "provider": "coingecko",
+            "category": "Crypto Spot",
+            "status": "active",
+            "sourceName": "CoinGecko Public API",
+            "details": "USD spot + 24h change + market cap",
+        },
+        "fx": {
+            "provider": "frankfurter",
+            "category": "FX",
+            "status": "active",
+            "sourceName": "Frankfurter / ECB",
+            "details": "ECB-sourced foreign exchange",
         },
         "news": {
-            "provider": "sec-filings-first",
+            "provider": news_provider,
+            "category": "Newswire",
+            "status": "active" if news_provider != "none" else "unconfigured",
+            "sourceName": "NewsAPI → GNews → Guardian",
+            "details": f"Active provider: {news_provider}",
+        },
+        "nlp": {
+            "provider": "finbert",
             "category": "NLP Transcripts & Sentiment",
             "status": "active",
             "sourceName": "Djup FinBERT NLP Engine",
-            "details": f"Parsed {sentiment_count} earnings call quarters"
-        }
+            "details": f"Parsed {sentiment_count} earnings call quarters",
+        },
     }
 
 @router.get("/sec/filings/{cik}")
@@ -121,55 +142,37 @@ def get_fred_series(series_id: str, start_date: str = "2020-01-01"):
 
 @router.get("/market/quote/{ticker}")
 def get_market_quote(ticker: str, db: Session = Depends(get_db)):
-    """Fetch live ticker quotes (stock price, volume, market cap) from FMP. Falls back to cached BDC summary values."""
+    """
+    Legacy route — kept for backward compatibility. Now proxies to the live
+    Yahoo Finance integration in /api/markets/quote. Falls back to cached
+    BDCSummary stock_price if Yahoo is unreachable.
+    """
+    from app.api.markets import _yahoo_quote
+
     ticker_upper = ticker.upper()
-    
-    quote = fmp_scraper.fetch_bdc_price_data(ticker_upper)
-    if quote:
-        return {
-            "ticker": ticker_upper,
-            "price": quote.get("price", 0.0),
-            "change": round(quote.get("price", 0.0) * 0.005, 2), # Derived change
-            "changePercent": 0.5,
-            "volume": 250000,
-            "marketCap": quote.get("market_cap", 0.0),
-            "source": "Financial Modeling Prep API",
-            "fetchedAt": datetime.now().isoformat()
-        }
-    
-    # Fallback to DB cached value if FMP unconfigured/fails
-    summary = db.query(BDCSummary).filter(BDCSummary.bdc_ticker == ticker_upper).order_by(BDCSummary.filing_date.desc()).first()
+    q = _yahoo_quote(ticker_upper)
+    if q:
+        return q
+
+    summary = (
+        db.query(BDCSummary)
+        .filter(BDCSummary.bdc_ticker == ticker_upper)
+        .order_by(BDCSummary.filing_date.desc())
+        .first()
+    )
     if summary and summary.stock_price:
         return {
             "ticker": ticker_upper,
-            "price": summary.stock_price,
+            "price": float(summary.stock_price),
             "change": 0.0,
             "changePercent": 0.0,
-            "volume": 120000,
-            "marketCap": summary.total_portfolio_fair_value or 0.0,
-            "source": "Database Cache (FMP Unconfigured)",
-            "fetchedAt": datetime.now().isoformat()
+            "volume": 0,
+            "marketCap": float(summary.total_portfolio_fair_value or 0.0),
+            "source": "Database cache (Yahoo unreachable)",
+            "fetchedAt": datetime.now().isoformat(),
         }
-    
-    # Fallback default mock
-    mock_defaults = {
-        "ARCC": {"price": 20.45, "change": 0.12, "pct": 0.59, "mcap": 12300000000},
-        "MAIN": {"price": 48.12, "change": -0.22, "pct": -0.45, "mcap": 4100000000},
-        "SPY": {"price": 520.15, "change": 2.45, "pct": 0.47, "mcap": 480000000000},
-        "HYG": {"price": 76.88, "change": 0.05, "pct": 0.07, "mcap": 15000000000}
-    }
-    
-    md = mock_defaults.get(ticker_upper, {"price": 15.0, "change": 0.0, "pct": 0.0, "mcap": 1000000000})
-    return {
-        "ticker": ticker_upper,
-        "price": md["price"],
-        "change": md["change"],
-        "changePercent": md["pct"],
-        "volume": 85000,
-        "marketCap": md["mcap"],
-        "source": "Mock System Default",
-        "fetchedAt": datetime.now().isoformat()
-    }
+
+    raise HTTPException(status_code=502, detail=f"Quote unavailable for {ticker_upper}")
 
 @router.get("/private-equity/deals")
 def get_private_equity_deals():

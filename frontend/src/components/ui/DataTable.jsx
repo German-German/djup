@@ -2,15 +2,15 @@ const DataTable = ({ data, columns, loading }) => {
   if (loading) {
     return (
       <div className="w-full h-32 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#F59E0B] border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border border-[var(--djup-border-strong)] border-t-[var(--djup-primary)] rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full h-32 flex items-center justify-center text-[#707070] text-sm font-mono uppercase tracking-widest">
-        No records found in current universe
+      <div className="w-full h-32 flex items-center justify-center djup-section-label">
+        No records in current universe
       </div>
     );
   }
@@ -30,10 +30,12 @@ const DataTable = ({ data, columns, loading }) => {
             <tr key={rowIndex}>
               {columns.map((col, colIndex) => (
                 <td key={colIndex}>
-                  {col.cell ? col.cell({ 
-                    getValue: () => row[col.accessorKey],
-                    row: row 
-                  }) : row[col.accessorKey]}
+                  {col.cell
+                    ? col.cell({
+                        getValue: () => row[col.accessorKey],
+                        row: row,
+                      })
+                    : row[col.accessorKey]}
                 </td>
               ))}
             </tr>

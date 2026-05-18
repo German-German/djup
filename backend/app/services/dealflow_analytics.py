@@ -22,36 +22,43 @@ def get_deal_flow_trends(db: Session, quarters: int = 8) -> list[dict]:
     
     yield_map = {y.quarter: float(y.avg_yield) if y.avg_yield else 0.0 for y in yield_trends}
 
+    # Sort by chronological order (year then quarter) instead of string-desc of "Qn_YY"
+    def _chrono_key(row):
+        q = row.quarter or ""
+        return f"{q[-2:]}_{q[:2]}" if len(q) >= 5 else q
+    sorted_trends = sorted(summary_trends, key=_chrono_key)
+
     results = []
-    # Reverse to return chronological order for time series chart
-    for row in reversed(summary_trends):
-        orig_mm = float(row.total_orig_mm) if row.total_orig_mm else 0.0
-        repay_mm = float(row.total_repay_mm) if row.total_repay_mm else 0.0
-        net_mm = float(row.total_net_mm) if row.total_net_mm else (orig_mm - repay_mm)
-        
-        orig_bn = orig_mm / 1000.0
-        repay_bn = repay_mm / 1000.0
-        net_bn = net_mm / 1000.0
-        
+    for row in sorted_trends:
+        orig_raw = float(row.total_orig_mm) if row.total_orig_mm else 0.0
+        repay_raw = float(row.total_repay_mm) if row.total_repay_mm else 0.0
+        net_raw = float(row.total_net_mm) if row.total_net_mm else (orig_raw - repay_raw)
+
+        # Source columns are stored as raw USD; convert to billions
+        orig_bn = orig_raw / 1e9
+        repay_bn = repay_raw / 1e9
+        net_bn = net_raw / 1e9
+
         q = row.quarter
-        avg_yield = yield_map.get(q, 0.0)
+        # BDCLoan.interest_rate is stored as percent (e.g. 10.75). Frontend expects a fraction.
+        avg_yield = yield_map.get(q, 0.0) / 100.0
 
         results.append({
             "quarter_label": q,
             "total_new_originations_bn": round(orig_bn, 2),
             "total_repayments_bn": round(repay_bn, 2),
             "net_deployment_bn": round(net_bn, 2),
-            "avg_new_origination_yield": round(avg_yield, 2)
+            "avg_new_origination_yield": round(avg_yield, 4)
         })
     return results
 
 def get_origination_by_sector(db: Session, quarter: str = None) -> list[dict]:
     # Group by industry for a specific quarter (or latest quarter if None)
     if not quarter:
-        latest = db.query(BDCLoan.quarter).order_by(desc(BDCLoan.quarter)).first()
-        if not latest:
+        latest_rows = [r[0] for r in db.query(BDCLoan.quarter).distinct().all() if r[0]]
+        if not latest_rows:
             return []
-        quarter = latest[0]
+        quarter = max(latest_rows, key=lambda q: f"{q[-2:]}_{q[:2]}" if len(q) >= 5 else q)
 
     industry_stats = db.query(
         BDCLoan.industry,
@@ -68,12 +75,13 @@ def get_origination_by_sector(db: Session, quarter: str = None) -> list[dict]:
     results = []
     for row in industry_stats:
         industry = row.industry or "Unknown"
-        fv_mm = float(row.total_fv) if row.total_fv else 0.0
-        pct = (fv_mm / total_quarter_fv) * 100 if total_quarter_fv > 0 else 0.0
-        
+        fv_raw = float(row.total_fv) if row.total_fv else 0.0
+        pct = (fv_raw / total_quarter_fv) * 100 if total_quarter_fv > 0 else 0.0
+
+        # BDCLoan.fair_value is raw USD; convert to millions
         results.append({
             "industry": industry,
-            "fair_value_mm": round(fv_mm, 2),
+            "fair_value_mm": round(fv_raw / 1e6, 2),
             "loan_count": row.loan_count,
             "avg_yield": round(float(row.avg_yield), 2) if row.avg_yield else None,
             "pct_of_total": round(pct, 2)
@@ -98,9 +106,9 @@ def get_hold_size_trends(db: Session) -> list[dict]:
             continue
         results.append({
             "quarter": q,
-            "avg_loan_size": round(statistics.mean(fvs), 2),
-            "median_loan_size": round(statistics.median(fvs), 2),
-            "max_loan_size": round(max(fvs), 2)
+            "avg_loan_size": round(statistics.mean(fvs) / 1e6, 2),
+            "median_loan_size": round(statistics.median(fvs) / 1e6, 2),
+            "max_loan_size": round(max(fvs) / 1e6, 2)
         })
     
     # Sort chronologically by year then quarter (e.g. Q1_23 -> 23_Q1)

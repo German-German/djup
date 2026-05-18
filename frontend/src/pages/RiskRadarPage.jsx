@@ -44,9 +44,10 @@ const RiskRadarPage = () => {
 
   const COLORS = ['var(--djup-green)', 'var(--djup-primary)', 'var(--djup-red)', 'var(--djup-purple)', 'var(--djup-cyan)'];
 
-  const naRate = stressDashboard?.universe_non_accrual_rate || 2.14;
-  const distressedFV = stressDashboard?.total_distressed_fair_value_mm || 450;
-  const worstBDC = stressDashboard?.worst_bdc || { ticker: 'BKCC', non_accrual_rate: 8.5 };
+  const naRate = (stressDashboard?.universe_non_accrual_rate ?? 2.14).toFixed(2);
+  const distressedFV = (stressDashboard?.total_distressed_fair_value_mm ?? 450).toFixed(1);
+  const worstBDCRaw = stressDashboard?.worst_bdc || { ticker: 'BKCC', non_accrual_rate: 8.5 };
+  const worstBDC = { ticker: worstBDCRaw.ticker, non_accrual_rate: Number(worstBDCRaw.non_accrual_rate.toFixed(2)) };
 
   const trendData = useMemo(() => {
     if (!nonAccrualTrends) return [];

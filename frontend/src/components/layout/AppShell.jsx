@@ -10,9 +10,7 @@ const AppShell = ({ children }) => {
       <div className="djup-main">
         <TopBar />
         <main className="djup-content custom-scrollbar">
-          <div className="max-w-[1600px] mx-auto w-full h-full">
-            {children}
-          </div>
+          <div className="max-w-[1640px] mx-auto w-full">{children}</div>
         </main>
         <StatusFooter />
       </div>

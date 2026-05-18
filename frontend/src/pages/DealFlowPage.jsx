@@ -29,7 +29,7 @@ const DealFlowPage = () => {
   const { data: bySector, loading: sectorLoading } = useApi('/dealflow/by-sector');
   const { data: holdSizes, loading: holdLoading } = useApi('/dealflow/hold-sizes');
 
-  const latestTrend = trends && trends.length > 0 ? trends[0] : { total_new_originations_bn: 12.4, net_deployment_bn: 4.2, avg_new_origination_yield: 0.114 };
+  const latestTrend = trends && trends.length > 0 ? trends[trends.length - 1] : { total_new_originations_bn: 12.4, net_deployment_bn: 4.2, avg_new_origination_yield: 0.114 };
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-8">
@@ -60,7 +60,7 @@ const DealFlowPage = () => {
         <div className="w-full h-full pt-4 pb-12">
           {trendsLoading ? <LoadingSpinner /> : trends?.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={trends ? [...trends].reverse() : []} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+              <ComposedChart data={trends || []} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" vertical={false} horizontal={false} />
                 <XAxis dataKey="quarter_label" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} dy={10} />
                 <YAxis yAxisId="left" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}B`} width={50} />
@@ -97,7 +97,7 @@ const DealFlowPage = () => {
           <div className="w-full h-full pt-4 pb-8 pr-4">
             {holdLoading ? <LoadingSpinner /> : holdSizes?.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={holdSizes ? [...holdSizes].reverse() : []} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <LineChart data={holdSizes || []} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" vertical={false} horizontal={false} />
                   <XAxis dataKey="quarter" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} dy={10} />
                   <YAxis stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}M`} width={60} />

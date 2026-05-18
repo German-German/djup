@@ -6,14 +6,20 @@ from app.models.database import BDCSummary, BDCLoan
 logger = logging.getLogger(__name__)
 
 def build_manager_comparison_matrix(db: Session, quarter: str = None) -> list[dict]:
-    if not quarter:
-        latest = db.query(BDCSummary.quarter).order_by(desc(BDCSummary.quarter)).first()
-        if not latest:
-            return []
-        quarter = latest[0]
+    if quarter:
+        summaries = db.query(BDCSummary).filter(BDCSummary.quarter == quarter).all()
+    else:
+        tickers = [t[0] for t in db.query(BDCSummary.bdc_ticker).distinct().all()]
+        summaries = []
+        for tk in tickers:
+            rows = db.query(BDCSummary).filter(BDCSummary.bdc_ticker == tk).order_by(desc(BDCSummary.quarter)).all()
+            picked = next(
+                (r for r in rows if r.total_portfolio_fair_value is not None and r.weighted_avg_yield is not None),
+                rows[0] if rows else None,
+            )
+            if picked is not None:
+                summaries.append(picked)
 
-    summaries = db.query(BDCSummary).filter(BDCSummary.quarter == quarter).all()
-    
     results = []
     for s in summaries:
         nav_pct = float(s.nav_premium_discount_pct) if s.nav_premium_discount_pct is not None else 0.0
@@ -34,8 +40,8 @@ def build_manager_comparison_matrix(db: Session, quarter: str = None) -> list[di
             
         results.append({
             "ticker": s.bdc_ticker,
-            "bdc_name": s.bdc_name,
-            "portfolio_size_bn": round(s.total_portfolio_fair_value / 1000.0, 2) if s.total_portfolio_fair_value else 0.0,
+            "bdc_name": s.bdc_name or s.bdc_ticker,
+            "portfolio_size_bn": round(s.total_portfolio_fair_value / 1e9, 2) if s.total_portfolio_fair_value else 0.0,
             "weighted_avg_yield": yield_pct,
             "non_accrual_rate_pct": non_accrual,
             "first_lien_pct": first_lien,
@@ -51,12 +57,20 @@ def build_manager_comparison_matrix(db: Session, quarter: str = None) -> list[di
     return results
 
 def get_bdc_deep_dive(db: Session, ticker: str) -> dict:
-    # 1. Latest summary
-    summary = db.query(BDCSummary).filter(BDCSummary.bdc_ticker == ticker).order_by(desc(BDCSummary.quarter)).first()
-    
-    # 2. Yield and Activity History (last 8 quarters)
-    history = db.query(BDCSummary).filter(BDCSummary.bdc_ticker == ticker).order_by(desc(BDCSummary.quarter)).limit(8).all()
-    history.reverse() # chronological order
+    def _chrono(q: str) -> str:
+        return f"{q[-2:]}_{q[:2]}" if q and len(q) >= 5 else (q or "")
+
+    all_rows = db.query(BDCSummary).filter(BDCSummary.bdc_ticker == ticker).all()
+    all_rows.sort(key=lambda r: _chrono(r.quarter))
+
+    # 1. Latest summary: prefer the most recent row that actually has data
+    summary = next(
+        (r for r in reversed(all_rows) if r.total_portfolio_fair_value is not None and r.weighted_avg_yield is not None),
+        all_rows[-1] if all_rows else None,
+    )
+
+    # 2. Yield and Activity History (last 8 quarters in chronological order)
+    history = all_rows[-8:]
     
     yield_history = []
     quarterly_activity = []
@@ -87,7 +101,7 @@ def get_bdc_deep_dive(db: Session, ticker: str) -> dict:
         top_10 = [{
             "borrower": l.borrower_name,
             "industry": l.industry,
-            "fair_value_mm": float(l.fair_value),
+            "fair_value_mm": round(float(l.fair_value) / 1e6, 2),
             "interest_rate": float(l.interest_rate) if l.interest_rate else None,
             "loan_type": l.loan_type
         } for l in sorted_loans[:10]]
@@ -105,25 +119,38 @@ def get_bdc_deep_dive(db: Session, ticker: str) -> dict:
             ind_dict[ind] = ind_dict.get(ind, 0) + fv
             loan_type_dict[lt] = loan_type_dict.get(lt, 0) + fv
             
-        ind_mix = [{"industry": k, "fair_value_mm": round(v, 2), "pct": round((v/total_fv)*100, 2) if total_fv else 0} for k, v in ind_dict.items()]
+        ind_mix = [{"industry": k, "fair_value_mm": round(v / 1e6, 2), "pct": round((v/total_fv)*100, 2) if total_fv else 0} for k, v in ind_dict.items()]
         ind_mix.sort(key=lambda x: x["fair_value_mm"], reverse=True)
-        
-        loan_mix = [{"loan_type": k, "fair_value_mm": round(v, 2), "pct": round((v/total_fv)*100, 2) if total_fv else 0} for k, v in loan_type_dict.items()]
+
+        loan_mix = [{"loan_type": k, "fair_value_mm": round(v / 1e6, 2), "pct": round((v/total_fv)*100, 2) if total_fv else 0} for k, v in loan_type_dict.items()]
         loan_mix.sort(key=lambda x: x["fair_value_mm"], reverse=True)
 
     # Format output
     summary_dict = {}
     if summary:
+        fv = float(summary.total_portfolio_fair_value) if summary.total_portfolio_fair_value else None
+        non_accrual = float(summary.non_accrual_rate_pct) if summary.non_accrual_rate_pct else None
+        first_lien = float(summary.first_lien_pct) if summary.first_lien_pct else None
+
+        risk_tier = "Balanced"
+        if first_lien is not None and non_accrual is not None:
+            if first_lien > 85.0 and non_accrual < 1.5:
+                risk_tier = "Conservative"
+            elif first_lien < 70.0 or non_accrual > 3.0:
+                risk_tier = "Aggressive"
+
         summary_dict = {
             "ticker": summary.bdc_ticker,
-            "name": summary.bdc_name,
+            "name": summary.bdc_name or summary.bdc_ticker,
             "quarter": summary.quarter,
             "nav_per_share": float(summary.nav_per_share) if summary.nav_per_share else None,
             "stock_price": float(summary.stock_price) if summary.stock_price else None,
             "nav_premium_discount_pct": float(summary.nav_premium_discount_pct) if summary.nav_premium_discount_pct else None,
-            "total_portfolio_fair_value": float(summary.total_portfolio_fair_value) if summary.total_portfolio_fair_value else None,
-            "non_accrual_rate_pct": float(summary.non_accrual_rate_pct) if summary.non_accrual_rate_pct else None,
+            "total_portfolio_fair_value": fv,
+            "portfolio_size_bn": round(fv / 1e9, 2) if fv else None,
+            "non_accrual_rate_pct": non_accrual,
             "weighted_avg_yield": float(summary.weighted_avg_yield) if summary.weighted_avg_yield else None,
+            "risk_tier": risk_tier,
         }
 
     return {

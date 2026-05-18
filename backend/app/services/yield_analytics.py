@@ -10,8 +10,10 @@ from app.models.database import BDCLoan, MacroIndicator
 logger = logging.getLogger(__name__)
 
 def _get_latest_quarter(db: Session) -> str:
-    result = db.query(BDCLoan.quarter).order_by(desc(BDCLoan.quarter)).first()
-    return result[0] if result and result[0] else None
+    rows = [r[0] for r in db.query(BDCLoan.quarter).distinct().all() if r[0]]
+    if not rows:
+        return None
+    return max(rows, key=lambda q: f"{q[-2:]}_{q[:2]}" if len(q) >= 5 else q)
 
 def get_weighted_yield_overview(db: Session, quarter: str = None, bdc_tickers: list = None, loan_type: str = None) -> dict:
     if not quarter:
@@ -139,8 +141,9 @@ def get_yield_time_series(db: Session, quarters: int = 8, bdc_tickers: list = No
     recent_quarters = [q[0] for q in distinct_quarters_q.limit(quarters).all()]
     if not recent_quarters:
         return []
-        
-    recent_quarters.sort() # Ascending order for chart
+
+    # Chronological order: "Q1_24" -> "24_Q1" so year sorts before quarter index
+    recent_quarters.sort(key=lambda q: f"{q[-2:]}_{q[:2]}" if q and len(q) >= 5 else q)
 
     results = []
     for q in recent_quarters:

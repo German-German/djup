@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from app.api import admin, predictions, forecast, commentary, external
+from app.api import admin, predictions, forecast, commentary, external, markets
 
 from app.database import engine, Base, SessionLocal
 from app.api import yields, stress, dealflow, managers, macro, sentiment
@@ -68,6 +68,7 @@ app.include_router(admin.router)
 app.include_router(predictions.router)
 app.include_router(forecast.router)
 app.include_router(commentary.router)
+app.include_router(markets.router)
 
 @app.on_event("startup")
 def startup_event():

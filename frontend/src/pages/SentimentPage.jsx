@@ -206,7 +206,7 @@ const SentimentPage = () => {
           <div className="w-full h-full pt-4 pb-8 pr-4">
             {tsLoading ? <LoadingSpinner /> : timeSeries?.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={[...timeSeries].reverse()} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <LineChart data={timeSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" vertical={false} horizontal={false} />
                   <XAxis dataKey="quarter" stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} dy={10} />
                   <YAxis stroke="var(--djup-text-muted)" tick={{ fill: 'var(--djup-text-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} domain={[-1, 1]} width={40} />

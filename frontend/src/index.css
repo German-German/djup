@@ -1,31 +1,55 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Djup Pro Terminal Palette */
-  --djup-bg-outer: #1b1c20;
-  --djup-bg-main: #090806;
-  --djup-bg-sidebar: #100d07;
-  --djup-bg-panel: #14110b;
-  --djup-bg-panel-elevated: #1c1710;
+  /* === Djup — Black / Charcoal / Tobacco / Gin === */
 
-  --djup-border: rgba(255, 190, 80, 0.18);
-  --djup-border-strong: rgba(255, 190, 80, 0.35);
+  /* Base surfaces */
+  --djup-bg-outer: #050505;
+  --djup-bg-main: #0a0a0a;
+  --djup-bg-sidebar: #0d0d0d;
+  --djup-bg-panel: #111111;
+  --djup-bg-panel-elevated: #181818;
 
-  --djup-primary: #ffb800;
-  --djup-primary-soft: rgba(255, 184, 0, 0.12);
+  /* Charcoal greys */
+  --djup-charcoal: #1f1f1f;
+  --djup-grey-strong: #2a2a2a;
+  --djup-grey: #4a4a4a;
+  --djup-grey-faint: #6f6f6f;
 
-  --djup-cyan: #00e5ff;
-  --djup-green: #00ff8a;
-  --djup-red: #ff6b6b;
-  --djup-purple: #b45cff;
+  /* Tobacco — the single accent. Warm, restrained, not glowing. */
+  --djup-primary: #A0785A;
+  --djup-primary-strong: #b88a68;
+  --djup-primary-soft: rgba(160, 120, 90, 0.10);
+  --djup-primary-line: rgba(160, 120, 90, 0.35);
 
-  --djup-text: #fff0d2;
-  --djup-text-muted: #b8a98b;
-  --djup-text-faint: #756a58;
+  /* Gin — the off-white linen */
+  --djup-text: #E8E4DC;
+  --djup-text-muted: #b3ad9f;
+  --djup-text-faint: #7a7568;
+
+  /* Borders — hairline, gin-tinted on dark */
+  --djup-border: rgba(232, 228, 220, 0.07);
+  --djup-border-strong: rgba(232, 228, 220, 0.16);
+
+  /* Status — muted, not neon */
+  --djup-positive: #7a9d80;
+  --djup-negative: #b86b6b;
+  --djup-neutral: #b8a78a;
+
+  /* Legacy aliases kept for backward compatibility with existing components.
+     All resolve into the new palette — no gradients, no neon. */
+  --djup-cyan: #b3ad9f;        /* secondary => gin-muted */
+  --djup-green: #7a9d80;       /* positive */
+  --djup-red: #b86b6b;         /* negative */
+  --djup-purple: #8a7a68;      /* tertiary accent => tobacco-warm */
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -36,43 +60,43 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   overflow-x: hidden;
+  font-feature-settings: "ss01", "cv11", "tnum";
 }
 
 ::selection {
   background-color: var(--djup-primary);
-  color: #000000;
+  color: #050505;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', sans-serif; /* Moving away from rounded outfit to sharper Inter/Jetbrains */
-  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.015em;
   margin: 0;
   color: var(--djup-text);
+  font-weight: 600;
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  font-feature-settings: "tnum", "ss01";
 }
 
-/* Page Background */
+/* Page Background — flat, no radial gradient */
 .djup-page-bg {
   min-height: 100vh;
-  background:
-    radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px),
-    var(--djup-bg-outer);
-  background-size: 14px 14px;
-  padding: 16px; /* Adjust based on viewport */
+  background-color: var(--djup-bg-outer);
+  padding: 0;
 }
 
-/* Terminal Frame */
+/* Terminal Frame — full-bleed, hard edges, hairline border */
 .djup-terminal-frame {
   background-color: var(--djup-bg-main);
-  border: 1px solid var(--djup-border-strong);
-  border-radius: 12px;
+  border: none;
+  border-radius: 0;
   display: flex;
-  height: calc(100vh - 32px); /* Account for padding */
+  height: 100vh;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 .djup-main {
@@ -85,32 +109,27 @@ h1, h2, h3, h4, h5, h6 {
 .djup-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 24px 28px;
   background-color: var(--djup-bg-main);
 }
 
-/* Reusable Components Global Overrides */
-
-/* Custom Scrollbar - Terminal Style */
+/* Hairline thin scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: var(--djup-bg-main);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--djup-border);
-  border-radius: 3px;
+  background: var(--djup-grey-strong);
+  border-radius: 0;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--djup-border-strong);
+  background: var(--djup-grey);
 }
 
-/* Table Enhancements */
+/* Tables — hard edges, gin headers, tight rows */
 table {
   width: 100%;
   border-collapse: separate;
@@ -118,52 +137,81 @@ table {
 }
 
 th {
-  color: var(--djup-text-muted);
-  font-size: 11px;
+  color: var(--djup-text-faint);
+  font-size: 10px;
   font-weight: 600;
   text-align: left;
   text-transform: uppercase;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--djup-border);
+  letter-spacing: 0.08em;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--djup-border-strong);
   font-family: 'JetBrains Mono', monospace;
+  background-color: var(--djup-bg-panel-elevated);
 }
 
 td {
-  padding: 16px;
-  font-size: 13px;
-  border-bottom: 1px solid rgba(255, 190, 80, 0.08);
-  transition: background 0.1s ease;
+  padding: 11px 14px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--djup-border);
+  transition: background 0.08s linear;
   color: var(--djup-text);
+  font-family: 'JetBrains Mono', monospace;
 }
 
 tr:hover td {
-  background-color: var(--djup-bg-panel);
+  background-color: var(--djup-bg-panel-elevated);
 }
 
-/* Recharts Customizations */
+/* Recharts — muted grid, gin-toned text */
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line {
-  stroke: rgba(255, 190, 80, 0.08); /* Faint amber grid */
-  stroke-dasharray: 3 3;
+  stroke: var(--djup-border);
+  stroke-dasharray: 0;
 }
 
 .recharts-text {
   font-family: 'JetBrains Mono', monospace !important;
   font-size: 10px !important;
-  fill: var(--djup-text-muted) !important;
+  fill: var(--djup-text-faint) !important;
 }
 
 .recharts-tooltip-cursor {
-  fill: rgba(255, 255, 255, 0.02) !important;
-  stroke: var(--djup-border);
+  fill: rgba(232, 228, 220, 0.03) !important;
+  stroke: var(--djup-border-strong);
 }
 
-/* Animations */
+/* Animations — restrained */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease forwards;
+  animation: fadeIn 0.18s ease-out forwards;
+}
+
+/* Override Tailwind's defaults for any leftover rounded-* classes on panels */
+.rounded-sm, .rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl,
+.rounded-r-\[10px\], .rounded-\[2px\] {
+  border-radius: 0 !important;
+}
+/* Keep dots / pills round */
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Utility: tobacco rule */
+.djup-rule {
+  height: 1px;
+  background: var(--djup-border-strong);
+  width: 100%;
+}
+
+/* Section heading — Bloomberg-style ticker label */
+.djup-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--djup-text-faint);
 }
