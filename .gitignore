@@ -18,3 +18,7 @@ env/
 # DB
 *.db
 *.sqlite
+
+# Local agent / worktree state (never commit)
+.claude/
+.claude-flow/
