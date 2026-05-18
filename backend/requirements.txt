@@ -22,4 +22,5 @@ slowapi
 rich
 shap
 prophet
+plotly
 openai

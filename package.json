@@ -4,10 +4,11 @@
   "scripts": {
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && . .venv/bin/activate && uvicorn main:app --reload --port 8000",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation concurrently --names \"api,web\" --prefix-colors \"yellow,cyan\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "install:all": "cd frontend && npm install && cd ../backend && . .venv/bin/activate && pip install -r requirements.txt"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
   }
 }

@@ -63,6 +63,79 @@ const MacroOverlayPage = () => {
     });
   }, [macroData, yieldsData]);
 
+  // Real correlations computed from the combined macro + private credit series.
+  const correlationPanels = useMemo(() => {
+    const pairs = (xs, ys) => {
+      const out = [];
+      for (let i = 0; i < xs.length; i++) {
+        const x = xs[i]; const y = ys[i];
+        if (x != null && y != null && Number.isFinite(x) && Number.isFinite(y)) {
+          out.push({ x, y });
+        }
+      }
+      return out;
+    };
+    const r2 = (data) => {
+      if (data.length < 3) return null;
+      const n = data.length;
+      const sx = data.reduce((a, p) => a + p.x, 0);
+      const sy = data.reduce((a, p) => a + p.y, 0);
+      const mx = sx / n;
+      const my = sy / n;
+      let num = 0, dx = 0, dy = 0;
+      for (const p of data) {
+        const ex = p.x - mx, ey = p.y - my;
+        num += ex * ey;
+        dx += ex * ex;
+        dy += ey * ey;
+      }
+      if (dx === 0 || dy === 0) return null;
+      const r = num / Math.sqrt(dx * dy);
+      return r * r;
+    };
+    // Sample one row per calendar month so dense daily macro doesn't drown
+    // out the quarterly private-credit cadence.
+    const monthly = (() => {
+      const seen = new Map();
+      for (const d of combinedData) {
+        const mo = d.date?.slice(0, 7);
+        if (!mo) continue;
+        if (!seen.has(mo)) seen.set(mo, d);
+      }
+      return Array.from(seen.values());
+    })();
+
+    const buildPanel = (title, key1, key2, color, blurb) => {
+      const data = [];
+      for (const d of monthly) {
+        const x = d[key1]; const y = d[key2];
+        if (x == null || y == null || !Number.isFinite(x) || !Number.isFinite(y)) continue;
+        data.push({ x, y });
+      }
+      return { title, color, text: blurb, r2: r2(data), data };
+    };
+    return [
+      buildPanel(
+        'Private Credit vs HY OAS',
+        'hy_spread', 'private_credit',
+        'var(--djup-primary)',
+        'Private credit yield vs high-yield option-adjusted spread (live FRED + SEC universe).',
+      ),
+      buildPanel(
+        'Private Credit vs SOFR',
+        'sofr', 'private_credit',
+        'var(--djup-text-muted)',
+        'Direct correlation reflects the floating-rate, SOFR-indexed nature of private credit.',
+      ),
+      buildPanel(
+        'HY OAS vs Yield Curve',
+        'yield_curve', 'hy_spread',
+        'var(--djup-positive)',
+        'Inversion of 10Y–2Y often precedes HY OAS widening — leading credit stress indicator.',
+      ),
+    ];
+  }, [combinedData]);
+
   const macroTableColumns = [
     { header: 'DATE', accessorKey: 'date', cell: info => <span className="font-mono">{info.getValue()}</span> },
     { header: 'HY SPREAD (BPS)', accessorKey: 'hy_spread', cell: info => <span className="font-mono text-[var(--djup-primary)]">{info.getValue()?.toFixed(2) || '-'}</span> },
@@ -144,28 +217,28 @@ const MacroOverlayPage = () => {
         )}
       </TerminalPanel>
 
-      {/* Correlation Scatter Row */}
+      {/* Correlation Scatter Row — computed live from combinedData */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         {[ 
-           { title: "Private vs HY Correlation", r2: "0.82", text: "Private credit yields lag HY spreads by ~2 quarters", color: "var(--djup-primary)" },
-           { title: "Private Yield vs SOFR", r2: "0.94", text: "Strong direct correlation due to floating rate nature", color: "var(--djup-purple)" },
-           { title: "Curve vs Non-Accrual Lead", r2: "0.68", text: "Inverted curve precedes non-accrual spikes by 4-6 quarters", color: "var(--djup-green)" }
-         ].map((card, i) => (
-           <TerminalPanel key={i} className="h-[240px] flex flex-col justify-between" title={card.title}>
-             <div className="absolute top-2 right-4 text-[12px] font-mono text-[var(--djup-cyan)] font-bold">R² = {card.r2}</div>
-             <div className="w-full h-[120px] pt-4 pr-4">
-               <ResponsiveContainer width="100%" height="100%">
-                 <ScatterChart margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 190, 80, 0.05)" horizontal={false} vertical={false} />
-                   <XAxis type="number" dataKey="x" hide />
-                   <YAxis type="number" dataKey="y" hide />
-                   <Scatter data={Array.from({length: 20}).map(() => ({x: Math.random()*10, y: Math.random()*10 + (i*2)}))} fill={card.color} opacity={0.6} />
-                 </ScatterChart>
-               </ResponsiveContainer>
-             </div>
-             <p className="font-mono text-[10px] text-[var(--djup-text-muted)] mt-auto pt-2 leading-relaxed border-t border-[rgba(255,190,80,0.05)]">{card.text}</p>
-           </TerminalPanel>
-         ))}
+        {correlationPanels.map((card, i) => (
+          <TerminalPanel key={i} className="h-[240px] flex flex-col justify-between" title={card.title}>
+            <div className="absolute top-2 right-4 text-[11px] font-mono text-[var(--djup-primary)] font-semibold tabular-nums">
+              R² = {card.r2 != null ? card.r2.toFixed(2) : '—'}
+            </div>
+            <div className="w-full h-[120px] pt-4 pr-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                  <CartesianGrid strokeDasharray="0" stroke="var(--djup-border)" />
+                  <XAxis type="number" dataKey="x" hide domain={['dataMin', 'dataMax']} />
+                  <YAxis type="number" dataKey="y" hide domain={['dataMin', 'dataMax']} />
+                  <Scatter data={card.data} fill={card.color} opacity={0.7} />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="font-mono text-[10px] text-[var(--djup-text-muted)] mt-auto pt-2 leading-relaxed border-t border-[var(--djup-border-strong)]">
+              {card.text}
+            </p>
+          </TerminalPanel>
+        ))}
       </div>
 
       {/* Table */}
