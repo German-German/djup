@@ -4,6 +4,7 @@ import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { EmptyState } from '../components/ui/EmptyState';
 import useApi from '../hooks/useApi';
+import AIInsightCard from '../components/ui/AIInsightCard';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from 'recharts';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -47,6 +48,19 @@ const DealFlowPage = () => {
           <Badge label="Institutional" />
         </div>
       </div>
+
+      <AIInsightCard
+        page="dealflow"
+        ready={!!trends}
+        context={{
+          latest_quarter: latestTrend?.quarter_label,
+          originations_bn: latestTrend?.total_new_originations_bn,
+          repayments_bn: latestTrend?.total_repayments_bn,
+          net_deployment_bn: latestTrend?.net_deployment_bn,
+          avg_yield: latestTrend?.avg_new_origination_yield,
+          top_sectors: (bySector || []).slice(0, 6).map(s => ({ industry: s.industry, fv_mm: s.fair_value_mm, pct: s.pct_of_total })),
+        }}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <KPICard label="GROSS ORIGINATIONS (Q)" value={`$${latestTrend?.total_new_originations_bn}B`} loading={trendsLoading && !trends} highlight />

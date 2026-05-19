@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { EmptyState } from '../components/ui/EmptyState';
 import useApi from '../hooks/useApi';
+import AIInsightCard from '../components/ui/AIInsightCard';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart, Cell, PieChart, Pie } from 'recharts';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -89,6 +90,21 @@ const RiskRadarPage = () => {
           <Badge label="Institutional" />
         </div>
       </div>
+
+      <AIInsightCard
+        page="risk-radar"
+        style="risk"
+        ready={!!stressDashboard}
+        context={{
+          universe_non_accrual_pct: naRate,
+          distressed_exposure_mm: distressedFV,
+          worst_bdc: worstBDC,
+          alerts_above_3pct: stressDashboard?.bdc_count_above_3pct,
+          top_watchlist: (watchlist || []).slice(0, 5).map(w => ({
+            borrower: w.borrower_name, exposure_mm: w.total_fair_value_mm, recovery: w.avg_fair_to_par, non_accrual: w.is_non_accrual_any,
+          })),
+        }}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard label="UNIVERSE NON-ACCRUAL" value={`${naRate}%`} delta={0.2} highlight />

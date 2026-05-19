@@ -5,6 +5,7 @@ import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { EmptyState } from '../components/ui/EmptyState';
 import useApi from '../hooks/useApi';
+import AIInsightCard from '../components/ui/AIInsightCard';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import * as d3 from 'd3';
 
@@ -180,9 +181,22 @@ const SentimentPage = () => {
         </div>
       </div>
 
+      <AIInsightCard
+        page="sentiment"
+        style="news"
+        ready={!!overview && !!latestKWs}
+        context={{
+          universe_score: overview?.avg_sentiment,
+          top: overview?.top_performer,
+          bottom: overview?.bottom_performer,
+          latest_keywords: latestKWs,
+          prior_keywords: prevKWs,
+        }}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <KPICard 
-          label="UNIVERSE SENTIMENT SCORE" 
+        <KPICard
+          label="UNIVERSE SENTIMENT SCORE"
           value={rawSentiment} 
           loading={overviewLoading && !overview} 
           highlight

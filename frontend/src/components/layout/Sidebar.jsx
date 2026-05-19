@@ -25,7 +25,7 @@ const NAV = [
 
 const Sidebar = () => {
   return (
-    <aside className="w-[260px] h-full bg-[var(--djup-bg-sidebar)] border-r border-[var(--djup-border-strong)] flex flex-col flex-shrink-0">
+    <aside className="w-[280px] h-full bg-[var(--djup-bg-sidebar)] border-r border-[var(--djup-border-strong)] flex flex-col flex-shrink-0">
       {/* Brand */}
       <div className="h-[68px] flex items-center px-7 border-b border-[var(--djup-border-strong)]">
         <NavLink to="/" className="flex items-baseline gap-2.5 no-underline">
@@ -37,9 +37,9 @@ const Sidebar = () => {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-5 px-3 overflow-y-auto">
-        <div className="djup-section-label px-3 mb-3">Workspace</div>
-        <div className="flex flex-col gap-0.5">
+      <nav className="flex-1 py-7 px-4 overflow-y-auto">
+        <div className="djup-section-label px-3 mb-4">Workspace</div>
+        <div className="flex flex-col gap-1">
           {NAV.map((link) => {
             const Icon = link.icon;
             return (
@@ -47,7 +47,7 @@ const Sidebar = () => {
                 key={link.name}
                 to={link.path}
                 className={({ isActive }) =>
-                  `group relative flex items-center gap-3 px-3 py-2.5 text-[13px] no-underline transition-colors duration-100 ` +
+                  `group relative flex items-center gap-3.5 px-3.5 py-3 text-[13.5px] no-underline transition-colors duration-100 ` +
                   (isActive
                     ? 'bg-[var(--djup-bg-panel-elevated)] text-[var(--djup-text)] font-medium'
                     : 'text-[var(--djup-text-muted)] hover:bg-[var(--djup-bg-panel)] hover:text-[var(--djup-text)]')
@@ -57,14 +57,14 @@ const Sidebar = () => {
                 {({ isActive }) => (
                   <>
                     <span
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 transition-opacity"
+                      className="absolute top-1/2 -translate-y-1/2 w-[2px] h-5 transition-opacity"
                       style={{
                         backgroundColor: 'var(--djup-primary)',
                         opacity: isActive ? 1 : 0,
-                        left: '-12px',
+                        left: '-16px',
                       }}
                     />
-                    <Icon className="w-[15px] h-[15px] shrink-0" strokeWidth={isActive ? 2 : 1.5} />
+                    <Icon className="w-[16px] h-[16px] shrink-0" strokeWidth={isActive ? 2 : 1.5} />
                     <span className="flex-1 truncate">{link.name}</span>
                   </>
                 )}

@@ -13,6 +13,7 @@ import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { EmptyState } from '../components/ui/EmptyState';
 import NewsFeed from '../components/ui/NewsFeed';
+import AIInsightCard from '../components/ui/AIInsightCard';
 import useApi from '../hooks/useApi';
 import {
   XAxis,
@@ -207,6 +208,23 @@ const OverviewPage = () => {
           <Badge label="Institutional" variant="default" />
         </div>
       </div>
+
+      {/* AI Analysis — always first */}
+      <AIInsightCard
+        page="overview"
+        ready={!!yieldOverview && !!stressDashboard}
+        context={{
+          weighted_yield_pct: yieldOverview?.overall_weighted_yield,
+          universe_non_accrual_pct: stressDashboard?.universe_non_accrual_rate,
+          net_q_deployment_bn: dealflowTrends?.[dealflowTrends.length - 1]?.net_deployment_bn,
+          nav_premium_pct_latest: navPremium?.[navPremium.length - 1]?.universe_avg_premium_discount,
+          worst_bdc: stressDashboard?.worst_bdc,
+          best_bdc: stressDashboard?.best_bdc,
+          hy_oas: macroSnapshot?.hy_spread?.value,
+          sofr_pct: macroSnapshot?.sofr?.value,
+          ust_10y_pct: macroSnapshot?.treasury_10y?.value,
+        }}
+      />
 
       {/* Live macro snapshot strip */}
       <div className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border-strong)] flex flex-wrap" style={{ borderRadius: 'var(--r-md)' }}>

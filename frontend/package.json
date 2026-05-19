@@ -11,6 +11,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.0",
     "@tailwindcss/forms": "^0.5.11",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.16.0",

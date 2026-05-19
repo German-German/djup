@@ -1,4 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RouteTracker from './components/auth/RouteTracker';
 import AppShell from './components/layout/AppShell';
 import OverviewPage from './pages/OverviewPage';
 import YieldMonitorPage from './pages/YieldMonitorPage';
@@ -9,24 +12,37 @@ import MacroOverlayPage from './pages/MacroOverlayPage';
 import SentimentPage from './pages/SentimentPage';
 import WelcomePage from './pages/WelcomePage';
 import AboutPage from './pages/AboutPage';
+import ProfilePage from './pages/ProfilePage';
+
+function ProtectedShell({ children }) {
+  return (
+    <ProtectedRoute>
+      <AppShell>
+        <RouteTracker />
+        {children}
+      </AppShell>
+    </ProtectedRoute>
+  );
+}
 
 function App() {
   return (
-    <Router>
-      <AppShell>
+    <AuthProvider>
+      <Router>
         <Routes>
           <Route path="/" element={<WelcomePage />} />
-          <Route path="/overview" element={<OverviewPage />} />
-          <Route path="/yields" element={<YieldMonitorPage />} />
-          <Route path="/risk-radar" element={<RiskRadarPage />} />
-          <Route path="/dealflow" element={<DealFlowPage />} />
-          <Route path="/managers" element={<ManagerMatrixPage />} />
-          <Route path="/macro" element={<MacroOverlayPage />} />
-          <Route path="/sentiment" element={<SentimentPage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/overview" element={<ProtectedShell><OverviewPage /></ProtectedShell>} />
+          <Route path="/yields" element={<ProtectedShell><YieldMonitorPage /></ProtectedShell>} />
+          <Route path="/risk-radar" element={<ProtectedShell><RiskRadarPage /></ProtectedShell>} />
+          <Route path="/dealflow" element={<ProtectedShell><DealFlowPage /></ProtectedShell>} />
+          <Route path="/managers" element={<ProtectedShell><ManagerMatrixPage /></ProtectedShell>} />
+          <Route path="/macro" element={<ProtectedShell><MacroOverlayPage /></ProtectedShell>} />
+          <Route path="/sentiment" element={<ProtectedShell><SentimentPage /></ProtectedShell>} />
+          <Route path="/profile" element={<ProtectedShell><ProfilePage /></ProtectedShell>} />
+          <Route path="/about" element={<ProtectedShell><AboutPage /></ProtectedShell>} />
         </Routes>
-      </AppShell>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 

@@ -6,6 +6,7 @@ import TerminalPanel from '../components/ui/TerminalPanel';
 import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import useApi from '../hooks/useApi';
+import AIInsightCard from '../components/ui/AIInsightCard';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, Cell } from 'recharts';
 
 // Custom tooltip for Recharts to match the dark theme
@@ -115,6 +116,18 @@ const YieldMonitorPage = () => {
           <Badge label="Institutional" />
         </div>
       </div>
+
+      <AIInsightCard
+        page="yields"
+        ready={!!yieldOverview && !!yieldByBDC}
+        context={{
+          overall_yield_pct: yieldOverview?.overall_weighted_yield,
+          first_lien_pct: flYield,
+          second_lien_pct: slYield,
+          unitranche_pct: uniYield,
+          by_bdc: yieldByBDC,
+        }}
+      />
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { ExternalLink, RefreshCw } from 'lucide-react';
+import { ExternalLink, RefreshCw, Sparkles, X } from 'lucide-react';
+import { aiService } from '../../services/aiService';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const REFRESH_MS = 5 * 60 * 1000;
@@ -22,6 +23,8 @@ const NewsFeed = ({ limit = 12 }) => {
   const [data, setData] = useState({ items: [], provider: null, fetchedAt: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [summarising, setSummarising] = useState(false);
 
   const fetchNews = useCallback(async () => {
     try {
@@ -43,10 +46,18 @@ const NewsFeed = ({ limit = 12 }) => {
 
   const items = (data.items || []).slice(0, limit);
 
+  const runSummary = async () => {
+    if (summarising) return;
+    setSummarising(true);
+    const res = await aiService.summarizeNews(items.slice(0, 10));
+    setSummary(res);
+    setSummarising(false);
+  };
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--djup-border-strong)] shrink-0">
-        <div className="flex items-baseline gap-2.5">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--djup-border-strong)] shrink-0 gap-3">
+        <div className="flex items-baseline gap-2.5 min-w-0">
           <span className="text-[14px] font-semibold text-[var(--djup-text)] tracking-tight">
             Newswire
           </span>
@@ -54,10 +65,17 @@ const NewsFeed = ({ limit = 12 }) => {
             <span className="djup-section-label">via {data.provider}</span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-[var(--djup-text-faint)]">
-            {data.fetchedAt ? `Updated ${formatRelative(data.fetchedAt)}` : 'Live'}
-          </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={runSummary}
+            disabled={summarising || items.length === 0}
+            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-[var(--djup-primary)] border border-[var(--djup-primary-line)] hover:bg-[var(--djup-primary-soft)] transition-colors disabled:opacity-40"
+            style={{ borderRadius: 'var(--r-xs)' }}
+            title="Summarise the newswire with Gemini"
+          >
+            <Sparkles size={11} strokeWidth={1.75} />
+            {summarising ? 'Summarising…' : 'Summarise'}
+          </button>
           <button
             onClick={fetchNews}
             className="p-1.5 text-[var(--djup-text-faint)] hover:text-[var(--djup-primary)] hover:bg-[var(--djup-bg-panel-elevated)] transition-colors"
@@ -68,6 +86,20 @@ const NewsFeed = ({ limit = 12 }) => {
           </button>
         </div>
       </div>
+
+      {summary && (
+        <div className="px-5 py-3.5 border-b border-[var(--djup-border-strong)] bg-[var(--djup-bg-panel-elevated)] flex items-start gap-3">
+          <Sparkles size={13} strokeWidth={1.75} className="text-[var(--djup-primary)] mt-0.5 shrink-0" />
+          <p className="flex-1 text-[12.5px] text-[var(--djup-text)] leading-relaxed">{summary.text}</p>
+          <button
+            onClick={() => setSummary(null)}
+            className="p-1 text-[var(--djup-text-faint)] hover:text-[var(--djup-text)] transition-colors"
+            aria-label="Dismiss summary"
+          >
+            <X size={12} strokeWidth={2} />
+          </button>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         {loading && items.length === 0 ? (

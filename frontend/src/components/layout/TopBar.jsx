@@ -1,6 +1,7 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Bell, Search, Monitor, Info, ChevronDown } from 'lucide-react';
+import { Bell, Search, Monitor, Info, ChevronDown, User } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TITLES = {
   '/': 'Market Overview',
@@ -14,10 +15,21 @@ const TITLES = {
   '/about': 'About',
 };
 
+const initialsFrom = (name = '', email = '') => {
+  if (name) {
+    const parts = name.trim().split(/\s+/);
+    return (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+  }
+  return (email[0] || 'U').toUpperCase();
+};
+
 const TopBar = () => {
   const location = useLocation();
-  const title = TITLES[location.pathname] || 'Terminal';
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
+  const title = TITLES[location.pathname] || (location.pathname === '/profile' ? 'Profile' : 'Terminal');
   const [now, setNow] = useState(new Date());
+  const initials = initialsFrom(profile?.full_name || '', user?.email || '');
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -71,13 +83,17 @@ const TopBar = () => {
         </div>
 
         <button
-          className="flex items-center gap-2.5 pl-2.5 pr-2 py-1.5 border border-[var(--djup-border-strong)] hover:border-[var(--djup-grey)] bg-[var(--djup-bg-panel)] transition-colors whitespace-nowrap"
+          onClick={() => navigate('/profile')}
+          className="flex items-center gap-2.5 pl-2.5 pr-3 py-1.5 border border-[var(--djup-border-strong)] hover:border-[var(--djup-grey)] bg-[var(--djup-bg-panel)] transition-colors whitespace-nowrap"
           style={{ borderRadius: 'var(--r-sm)' }}
+          title="Open profile"
         >
           <div className="w-6 h-6 rounded-full bg-[var(--djup-primary-soft)] border border-[var(--djup-primary-line)] flex items-center justify-center text-[10px] font-semibold text-[var(--djup-primary)]">
-            JN
+            {initials || <User size={11} strokeWidth={1.75} />}
           </div>
-          <span className="text-[12.5px] text-[var(--djup-text)]">Institutional</span>
+          <span className="text-[12.5px] text-[var(--djup-text)] hidden sm:inline">
+            {profile?.full_name || user?.email?.split('@')[0] || 'Account'}
+          </span>
           <ChevronDown size={12} className="text-[var(--djup-text-faint)]" strokeWidth={1.5} />
         </button>
       </div>

@@ -4,6 +4,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import DataTable from '../components/ui/DataTable';
 import Badge from '../components/ui/Badge';
 import useApi from '../hooks/useApi';
+import AIInsightCard from '../components/ui/AIInsightCard';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
 import { X, ExternalLink } from 'lucide-react';
 
@@ -63,6 +64,22 @@ const ManagerMatrixPage = () => {
           <Badge label="Institutional" />
         </div>
       </div>
+
+      <AIInsightCard
+        page="managers"
+        ready={!!matrix && matrix.length > 0}
+        context={{
+          managers: (matrix || []).map(m => ({
+            ticker: m.ticker,
+            portfolio_size_bn: m.portfolio_size_bn,
+            yield_pct: m.weighted_avg_yield,
+            non_accrual_pct: m.non_accrual_rate_pct,
+            nav_premium_pct: m.nav_premium_discount_pct,
+            yield_risk_ratio: m.yield_risk_ratio,
+            risk_tier: m.risk_tier,
+          })),
+        }}
+      />
 
       <TerminalPanel className="h-[400px]" title="Manager Comparison Matrix">
         <div className="w-full h-full overflow-y-auto pb-8">

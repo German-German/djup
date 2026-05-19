@@ -8,8 +8,8 @@ const TerminalPanel = ({ children, className = '', title, action, source, subtit
       style={{ borderRadius: 'var(--r-md)' }}
     >
       {hasHeader && (
-        <div className="h-[52px] px-6 border-b border-[var(--djup-border-strong)] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="h-[56px] px-7 border-b border-[var(--djup-border-strong)] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3.5 min-w-0">
             {title && (
               <h3 className="text-[14px] font-semibold text-[var(--djup-text)] tracking-tight truncate">
                 {title}
@@ -29,7 +29,7 @@ const TerminalPanel = ({ children, className = '', title, action, source, subtit
           {action && <div className="flex items-center gap-2 shrink-0">{action}</div>}
         </div>
       )}
-      <div className={`flex-1 relative overflow-hidden ${padding ? 'p-6' : ''}`}>{children}</div>
+      <div className={`flex-1 relative overflow-hidden ${padding ? 'p-7' : ''}`}>{children}</div>
     </div>
   );
 };

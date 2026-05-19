@@ -4,6 +4,7 @@ import Badge from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import DataTable from '../components/ui/DataTable';
 import useApi from '../hooks/useApi';
+import AIInsightCard from '../components/ui/AIInsightCard';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, ScatterChart, Scatter } from 'recharts';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -163,6 +164,17 @@ const MacroOverlayPage = () => {
           <Badge label="Institutional" />
         </div>
       </div>
+
+      <AIInsightCard
+        page="macro"
+        style="macro"
+        ready={combinedData && combinedData.length > 0}
+        context={{
+          latest: combinedData?.[combinedData.length - 1],
+          r2_panels: correlationPanels.map(c => ({ title: c.title, r2: c.r2, n: c.data.length })),
+          points: combinedData?.length || 0,
+        }}
+      />
 
       {/* Series Filters */}
       <div className="flex items-center gap-3 bg-[var(--djup-bg-panel)] p-3 border border-[var(--djup-border)] rounded-sm flex-wrap">
