@@ -104,17 +104,15 @@ const YieldMonitorPage = () => {
       {/* Page Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--djup-text)] font-['Inter'] tracking-tight mb-2">Yield Analytics</h1>
-          <p className="text-[12px] font-mono text-[var(--djup-text-muted)] max-w-2xl leading-relaxed">
+          <h1 className="text-[28px] font-semibold text-[var(--djup-text)] tracking-tight mb-2">Yield Analytics</h1>
+          <p className="text-[14px] text-[var(--djup-text-muted)] max-w-2xl leading-relaxed">
             Historical spread movement, tranche yields, and manager performance dispersion across the private credit universe
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Badge label="Live Universe" variant="live" />
           <Badge label="AI Trend Projection" variant="ai" />
-          <div className="px-3 py-1 bg-[var(--djup-bg-panel)] border border-[var(--djup-border)] text-[var(--djup-text)] text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm">
-            Institutional View
-          </div>
+          <Badge label="Institutional" />
         </div>
       </div>
 

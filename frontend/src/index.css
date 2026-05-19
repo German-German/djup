@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,88 +7,111 @@
 :root {
   /* === Djup — Black / Charcoal / Tobacco / Gin === */
 
-  /* Base surfaces */
-  --djup-bg-outer: #050505;
-  --djup-bg-main: #0a0a0a;
-  --djup-bg-sidebar: #0d0d0d;
-  --djup-bg-panel: #111111;
-  --djup-bg-panel-elevated: #181818;
+  /* Surfaces — softened blacks for more breathing room. */
+  --djup-bg-outer: #0b0b0d;
+  --djup-bg-main: #101013;
+  --djup-bg-sidebar: #0d0d10;
+  --djup-bg-panel: #16161a;
+  --djup-bg-panel-elevated: #1d1d22;
 
   /* Charcoal greys */
-  --djup-charcoal: #1f1f1f;
-  --djup-grey-strong: #2a2a2a;
-  --djup-grey: #4a4a4a;
-  --djup-grey-faint: #6f6f6f;
+  --djup-charcoal: #22222a;
+  --djup-grey-strong: #2f2f37;
+  --djup-grey: #545459;
+  --djup-grey-faint: #7a7a80;
 
-  /* Tobacco — the single accent. Warm, restrained, not glowing. */
-  --djup-primary: #A0785A;
-  --djup-primary-strong: #b88a68;
-  --djup-primary-soft: rgba(160, 120, 90, 0.10);
-  --djup-primary-line: rgba(160, 120, 90, 0.35);
+  /* Tobacco — single accent. Warm, restrained. */
+  --djup-primary: #B58968;
+  --djup-primary-strong: #cc9a76;
+  --djup-primary-soft: rgba(181, 137, 104, 0.10);
+  --djup-primary-line: rgba(181, 137, 104, 0.35);
 
-  /* Gin — the off-white linen */
-  --djup-text: #E8E4DC;
-  --djup-text-muted: #b3ad9f;
-  --djup-text-faint: #7a7568;
+  /* Gin — off-white linen */
+  --djup-text: #EFEAE0;
+  --djup-text-muted: #b5b0a3;
+  --djup-text-faint: #7d7a73;
 
   /* Borders — hairline, gin-tinted on dark */
-  --djup-border: rgba(232, 228, 220, 0.07);
-  --djup-border-strong: rgba(232, 228, 220, 0.16);
+  --djup-border: rgba(239, 234, 224, 0.06);
+  --djup-border-strong: rgba(239, 234, 224, 0.14);
 
-  /* Status — muted, not neon */
-  --djup-positive: #7a9d80;
-  --djup-negative: #b86b6b;
+  /* Status — muted, modern */
+  --djup-positive: #8db195;
+  --djup-negative: #c8847f;
   --djup-neutral: #b8a78a;
 
-  /* Legacy aliases kept for backward compatibility with existing components.
-     All resolve into the new palette — no gradients, no neon. */
-  --djup-cyan: #b3ad9f;        /* secondary => gin-muted */
-  --djup-green: #7a9d80;       /* positive */
-  --djup-red: #b86b6b;         /* negative */
-  --djup-purple: #8a7a68;      /* tertiary accent => tobacco-warm */
+  /* Legacy aliases — backward compat with charts */
+  --djup-cyan: #b5b0a3;
+  --djup-green: #8db195;
+  --djup-red: #c8847f;
+  --djup-purple: #9a8674;
+
+  /* Typography scale */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Radii — soft modern corners (not 2007 sharp, not Bloomberg square) */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  font-size: 15px;
+}
+
 body {
   background-color: var(--djup-bg-outer);
   color: var(--djup-text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   overflow-x: hidden;
-  font-feature-settings: "ss01", "cv11", "tnum";
+  line-height: 1.55;
+  font-weight: 400;
 }
 
 ::selection {
   background-color: var(--djup-primary);
-  color: #050505;
+  color: var(--djup-bg-outer);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', sans-serif;
-  letter-spacing: -0.015em;
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
   margin: 0;
   color: var(--djup-text);
   font-weight: 600;
+  line-height: 1.25;
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
-  font-feature-settings: "tnum", "ss01";
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum';
 }
 
-/* Page Background — flat, no radial gradient */
+/* Numbers — tabular, slightly tighter tracking, modern */
+.font-num {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum', 'cv11', 'ss01';
+  letter-spacing: -0.01em;
+}
+
+/* Page Background */
 .djup-page-bg {
   min-height: 100vh;
   background-color: var(--djup-bg-outer);
   padding: 0;
 }
 
-/* Terminal Frame — full-bleed, hard edges, hairline border */
+/* Terminal Frame */
 .djup-terminal-frame {
   background-color: var(--djup-bg-main);
   border: none;
@@ -104,32 +127,33 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0;
 }
 
 .djup-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 28px;
+  padding: 32px 36px;
   background-color: var(--djup-bg-main);
 }
 
-/* Hairline thin scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: var(--djup-bg-main);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--djup-grey-strong);
-  border-radius: 0;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--djup-grey);
 }
 
-/* Tables — hard edges, gin headers, tight rows */
+/* Tables — readable, breathable, monospaced numerals */
 table {
   width: 100%;
   border-collapse: separate;
@@ -138,31 +162,31 @@ table {
 
 th {
   color: var(--djup-text-faint);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   text-align: left;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 10px 14px;
+  letter-spacing: 0.1em;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--djup-border-strong);
-  font-family: 'JetBrains Mono', monospace;
-  background-color: var(--djup-bg-panel-elevated);
+  font-family: var(--font-sans);
+  background-color: transparent;
 }
 
 td {
-  padding: 11px 14px;
-  font-size: 12px;
+  padding: 14px 18px;
+  font-size: 13px;
   border-bottom: 1px solid var(--djup-border);
-  transition: background 0.08s linear;
+  transition: background 0.12s ease;
   color: var(--djup-text);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-sans);
 }
 
 tr:hover td {
-  background-color: var(--djup-bg-panel-elevated);
+  background-color: rgba(239, 234, 224, 0.025);
 }
 
-/* Recharts — muted grid, gin-toned text */
+/* Recharts theming */
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line {
   stroke: var(--djup-border);
@@ -170,48 +194,70 @@ tr:hover td {
 }
 
 .recharts-text {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 10px !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
   fill: var(--djup-text-faint) !important;
 }
 
 .recharts-tooltip-cursor {
-  fill: rgba(232, 228, 220, 0.03) !important;
+  fill: rgba(239, 234, 224, 0.04) !important;
   stroke: var(--djup-border-strong);
 }
 
-/* Animations — restrained */
+/* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.18s ease-out forwards;
+  animation: fadeIn 0.24s ease-out forwards;
 }
 
-/* Override Tailwind's defaults for any leftover rounded-* classes on panels */
-.rounded-sm, .rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl,
-.rounded-r-\[10px\], .rounded-\[2px\] {
-  border-radius: 0 !important;
-}
-/* Keep dots / pills round */
-.rounded-full {
-  border-radius: 9999px !important;
-}
+/* Force soft-corner radii on legacy rounded classes (panels stay subtle modern) */
+.rounded-sm, .rounded, .rounded-\[2px\] { border-radius: var(--r-xs) !important; }
+.rounded-md { border-radius: var(--r-sm) !important; }
+.rounded-lg { border-radius: var(--r-md) !important; }
+.rounded-xl { border-radius: var(--r-lg) !important; }
+.rounded-2xl { border-radius: 14px !important; }
+.rounded-r-\[10px\] { border-radius: 0 var(--r-md) var(--r-md) 0 !important; }
+.rounded-full { border-radius: 9999px !important; }
 
-/* Utility: tobacco rule */
+/* Subtle hairline */
 .djup-rule {
   height: 1px;
   background: var(--djup-border-strong);
   width: 100%;
 }
 
-/* Section heading — Bloomberg-style ticker label */
+/* Section eyebrow label — small caps style, sans-serif */
 .djup-section-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--djup-text-faint);
+}
+
+/* Numeric data label — slightly different than text labels */
+.djup-mono-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--djup-text-faint);
+}
+
+/* Card — modernized panel container */
+.djup-card {
+  background: var(--djup-bg-panel);
+  border: 1px solid var(--djup-border-strong);
+  border-radius: var(--r-md);
+}
+
+/* Focus rings — subtle tobacco */
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--djup-primary);
+  outline-offset: 2px;
 }

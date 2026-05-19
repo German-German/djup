@@ -1,15 +1,15 @@
 const DataTable = ({ data, columns, loading }) => {
   if (loading) {
     return (
-      <div className="w-full h-32 flex items-center justify-center">
-        <div className="w-5 h-5 border border-[var(--djup-border-strong)] border-t-[var(--djup-primary)] rounded-full animate-spin" />
+      <div className="w-full h-40 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[var(--djup-border-strong)] border-t-[var(--djup-primary)] rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full h-32 flex items-center justify-center djup-section-label">
+      <div className="w-full h-40 flex items-center justify-center djup-section-label">
         No records in current universe
       </div>
     );

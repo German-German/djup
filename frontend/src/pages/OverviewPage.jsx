@@ -167,54 +167,49 @@ const OverviewPage = () => {
 
   const macroChip = (label, key, suffix = '') => {
     const s = macroSnapshot?.[key];
-    if (!s || s.value == null) {
-      return (
-        <div className="flex flex-col gap-1 px-4 py-2 border-r border-[var(--djup-border-strong)] last:border-r-0">
-          <span className="djup-section-label">{label}</span>
-          <span className="font-mono text-[12px] text-[var(--djup-text-faint)]">—</span>
-        </div>
-      );
-    }
-    const change = s.change ?? 0;
-    const color =
-      change > 0 ? 'text-[var(--djup-positive)]' : change < 0 ? 'text-[var(--djup-negative)]' : 'text-[var(--djup-text-muted)]';
+    const change = s?.change ?? 0;
+    const color = change > 0 ? 'text-[var(--djup-positive)]' : change < 0 ? 'text-[var(--djup-negative)]' : 'text-[var(--djup-text-faint)]';
     return (
-      <div className="flex flex-col gap-1 px-4 py-2 border-r border-[var(--djup-border-strong)] last:border-r-0">
+      <div className="flex-1 min-w-[140px] flex flex-col gap-2 px-5 py-4 border-r border-[var(--djup-border) last:border-r-0]">
         <span className="djup-section-label">{label}</span>
-        <div className="flex items-baseline gap-2">
-          <span className="font-mono text-[13px] text-[var(--djup-text)]">
-            {s.value.toFixed(2)}
-            {suffix}
-          </span>
-          <span className={`font-mono text-[10px] ${color}`}>
-            {change > 0 ? '+' : ''}
-            {change.toFixed(2)}
-          </span>
-        </div>
+        {!s || s.value == null ? (
+          <span className="font-num text-[15px] text-[var(--djup-text-faint)]">—</span>
+        ) : (
+          <div className="flex items-baseline gap-2.5">
+            <span className="font-num text-[18px] font-semibold text-[var(--djup-text)] tabular-nums">
+              {s.value.toFixed(2)}
+              {suffix && <span className="text-[12px] text-[var(--djup-text-muted)] ml-0.5">{suffix}</span>}
+            </span>
+            <span className={`text-[11.5px] font-medium tabular-nums ${color}`}>
+              {change > 0 ? '+' : ''}
+              {change.toFixed(2)}
+            </span>
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col gap-5 animate-fade-in pb-10">
+    <div className="flex flex-col gap-7 animate-fade-in pb-12">
       {/* Header */}
-      <div className="flex justify-between items-start pb-4 border-b border-[var(--djup-border-strong)]">
-        <div>
-          <h1 className="text-[22px] font-semibold text-[var(--djup-text)] font-['Inter'] tracking-tight mb-1.5">
+      <div className="flex justify-between items-start flex-wrap gap-4 pb-6 border-b border-[var(--djup-border-strong)]">
+        <div className="max-w-2xl">
+          <h1 className="text-[28px] font-semibold text-[var(--djup-text)] tracking-tight mb-2">
             Market Overview
           </h1>
-          <p className="text-[12px] font-mono text-[var(--djup-text-muted)] max-w-xl leading-relaxed">
+          <p className="text-[14px] text-[var(--djup-text-muted)] leading-relaxed">
             Universe metrics, structural stress signals, AI-synthesised commentary, and live newswire.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <Badge label="Live Universe" variant="live" />
-          <span className="djup-section-label">Institutional</span>
+          <Badge label="Institutional" variant="default" />
         </div>
       </div>
 
       {/* Live macro snapshot strip */}
-      <div className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border-strong)] flex flex-wrap">
+      <div className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border-strong)] flex flex-wrap" style={{ borderRadius: 'var(--r-md)' }}>
         {macroChip('HY OAS (bps)', 'hy_spread')}
         {macroChip('IG OAS (bps)', 'ig_spread')}
         {macroChip('SOFR', 'sofr', '%')}
@@ -224,20 +219,22 @@ const OverviewPage = () => {
       </div>
 
       {/* Live ticker tape */}
-      <div className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border-strong)] py-2 px-4 flex items-center gap-6 overflow-x-auto whitespace-nowrap">
-        <span className="djup-section-label border-r border-[var(--djup-border-strong)] pr-4">Live Marks</span>
-        <div className="flex items-center gap-6">
+      <div className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border-strong)] py-3 px-5 flex items-center gap-8 overflow-x-auto whitespace-nowrap" style={{ borderRadius: 'var(--r-md)' }}>
+        <div className="flex items-center gap-2 shrink-0 pr-4 border-r border-[var(--djup-border-strong)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--djup-primary)] animate-pulse" />
+          <span className="djup-section-label">Live Marks</span>
+        </div>
+        <div className="flex items-center gap-7">
           {marketQuotes && marketQuotes.length > 0 ? (
             marketQuotes.map((q) => {
               const pct = q.changePercent ?? 0;
               const isPos = pct >= 0;
               return (
-                <div key={q.ticker} className="flex items-center gap-2 font-mono text-[11px]">
-                  <span className="font-semibold text-[var(--djup-text)]">{q.ticker}</span>
-                  <span className="text-[var(--djup-text-muted)]">${(q.price ?? 0).toFixed(2)}</span>
-                  <span className={isPos ? 'text-[var(--djup-positive)]' : 'text-[var(--djup-negative)]'}>
-                    {isPos ? '+' : ''}
-                    {pct.toFixed(2)}%
+                <div key={q.ticker} className="flex items-baseline gap-2.5 text-[12.5px]">
+                  <span className="font-semibold text-[var(--djup-text)] tracking-wide">{q.ticker}</span>
+                  <span className="font-num tabular-nums text-[var(--djup-text-muted)]">${(q.price ?? 0).toFixed(2)}</span>
+                  <span className={`font-num tabular-nums text-[11.5px] font-medium ${isPos ? 'text-[var(--djup-positive)]' : 'text-[var(--djup-negative)]'}`}>
+                    {isPos ? '+' : ''}{pct.toFixed(2)}%
                   </span>
                 </div>
               );
@@ -246,18 +243,21 @@ const OverviewPage = () => {
             <span className="djup-section-label animate-pulse">Connecting Yahoo Finance…</span>
           )}
           {crypto.length > 0 && (
-            <span className="djup-section-label border-l border-[var(--djup-border-strong)] pl-4">Crypto</span>
+            <div className="flex items-center gap-2 shrink-0 pl-4 border-l border-[var(--djup-border-strong)]">
+              <span className="djup-section-label">Crypto</span>
+            </div>
           )}
           {crypto.map((c) => {
             const pct = c.changePercent ?? 0;
             const isPos = pct >= 0;
+            const price = c.price ?? 0;
+            const formatted = price >= 100 ? price.toLocaleString(undefined, { maximumFractionDigits: 0 }) : price.toFixed(2);
             return (
-              <div key={c.id} className="flex items-center gap-2 font-mono text-[11px]">
-                <span className="font-semibold text-[var(--djup-text)] uppercase">{c.id.slice(0, 3)}</span>
-                <span className="text-[var(--djup-text-muted)]">${(c.price ?? 0).toLocaleString()}</span>
-                <span className={isPos ? 'text-[var(--djup-positive)]' : 'text-[var(--djup-negative)]'}>
-                  {isPos ? '+' : ''}
-                  {pct.toFixed(2)}%
+              <div key={c.id} className="flex items-baseline gap-2.5 text-[12.5px]">
+                <span className="font-semibold text-[var(--djup-text)] uppercase tracking-wide">{c.id.slice(0, 3)}</span>
+                <span className="font-num tabular-nums text-[var(--djup-text-muted)]">${formatted}</span>
+                <span className={`font-num tabular-nums text-[11.5px] font-medium ${isPos ? 'text-[var(--djup-positive)]' : 'text-[var(--djup-negative)]'}`}>
+                  {isPos ? '+' : ''}{pct.toFixed(2)}%
                 </span>
               </div>
             );
@@ -266,7 +266,7 @@ const OverviewPage = () => {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--djup-border-strong)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard label="Universe weighted yield" value={`${wtdAvgYield}%`} loading={yieldLoading && !wtdAvgYield} delta={1.25} highlight />
         <KPICard label="Market non-accrual" value={`${nonAccrual}%`} delta={-0.12} />
         <KPICard label="Net Q deployment" value={`$${netDeployment}B`} delta={0.4} />
@@ -276,7 +276,7 @@ const OverviewPage = () => {
       {/* Main analysis grid */}
       <div className="grid grid-cols-12 gap-5">
         <TerminalPanel
-          className="col-span-12 lg:col-span-8 h-[420px]"
+          className="col-span-12 lg:col-span-8 h-[440px]"
           title="Yield Analytics & Spread Tracking"
           source="FRED · SEC ingest"
         >
@@ -313,47 +313,47 @@ const OverviewPage = () => {
         </TerminalPanel>
 
         <TerminalPanel
-          className="col-span-12 lg:col-span-4 h-[420px] p-0"
-          title="Newswire"
-          source="auto-refresh 5m"
+          className="col-span-12 lg:col-span-4 h-[440px]"
+          padding={false}
         >
-          <div className="absolute inset-0 top-9">
-            <NewsFeed limit={10} />
-          </div>
+          <NewsFeed limit={10} />
         </TerminalPanel>
 
         <TerminalPanel
-          className="col-span-12 lg:col-span-7 h-[360px]"
+          className="col-span-12 lg:col-span-7 h-[400px]"
           title="Priority Risk Radar"
           source="BDC stress models"
+          padding={false}
         >
-          <div className="overflow-y-auto h-full pr-1">
+          <div className="overflow-y-auto h-full">
             {watchlist?.length > 0 ? (
               <DataTable data={watchlist.slice(0, 7)} columns={watchColumns} />
             ) : (
-              <EmptyState title="No active alerts" description="All tracked entities are performing within thresholds." />
+              <div className="p-6"><EmptyState title="No active alerts" description="All tracked entities are performing within thresholds." /></div>
             )}
           </div>
         </TerminalPanel>
 
         <TerminalPanel
-          className="col-span-12 lg:col-span-5 h-[360px]"
+          className="col-span-12 lg:col-span-5 h-[400px]"
           title="AI Market Commentary"
           source={commentary?.date ? `Synth ${commentary.date}` : ''}
           action={
             <button
-              className="djup-section-label hover:text-[var(--djup-text)] transition-colors"
+              className="p-1.5 text-[var(--djup-text-faint)] hover:text-[var(--djup-text)] hover:bg-[var(--djup-bg-panel-elevated)] transition-colors"
+              style={{ borderRadius: 'var(--r-xs)' }}
               onClick={() => setCommentaryExpanded((v) => !v)}
+              aria-label={commentaryExpanded ? 'Collapse' : 'Expand'}
             >
-              {commentaryExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {commentaryExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
           }
         >
-          <div className="h-full overflow-y-auto pr-1">
+          <div className="h-full overflow-y-auto -mr-3 pr-3">
             {commentaryLoading ? (
               <LoadingSpinner label="Generating insights" />
             ) : commentary?.commentary_text ? (
-              <div className="text-[12px] font-mono text-[var(--djup-text-muted)] leading-relaxed space-y-3">
+              <div className="text-[13px] text-[var(--djup-text-muted)] leading-relaxed space-y-3.5">
                 {commentary.commentary_text.split('\n').map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
@@ -361,7 +361,7 @@ const OverviewPage = () => {
             ) : (
               <EmptyState
                 title="Synthesis unavailable"
-                description="Set OPENAI_API_KEY to generate automated commentary."
+                description="Set OPENAI_API_KEY to generate automated commentary from latest filings."
               />
             )}
           </div>

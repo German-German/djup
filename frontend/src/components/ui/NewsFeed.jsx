@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, RefreshCw } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const REFRESH_MS = 5 * 60 * 1000;
@@ -45,24 +45,34 @@ const NewsFeed = ({ limit = 12 }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--djup-border-strong)] bg-[var(--djup-bg-main)]">
-        <div className="flex items-center gap-3">
-          <span className="text-[12px] font-semibold text-[var(--djup-text)] font-['Inter'] tracking-tight">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--djup-border-strong)] shrink-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-[14px] font-semibold text-[var(--djup-text)] tracking-tight">
             Newswire
           </span>
-          <span className="djup-section-label">
-            {data.provider ? `via ${data.provider}` : '—'}
-          </span>
+          {data.provider && (
+            <span className="djup-section-label">via {data.provider}</span>
+          )}
         </div>
-        <span className="djup-section-label">
-          {data.fetchedAt ? `Updated ${formatRelative(data.fetchedAt)}` : 'Live'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-[var(--djup-text-faint)]">
+            {data.fetchedAt ? `Updated ${formatRelative(data.fetchedAt)}` : 'Live'}
+          </span>
+          <button
+            onClick={fetchNews}
+            className="p-1.5 text-[var(--djup-text-faint)] hover:text-[var(--djup-primary)] hover:bg-[var(--djup-bg-panel-elevated)] transition-colors"
+            style={{ borderRadius: 'var(--r-xs)' }}
+            aria-label="Refresh"
+          >
+            <RefreshCw size={12} strokeWidth={1.75} />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {loading && items.length === 0 ? (
           <div className="flex items-center justify-center py-12 djup-section-label">
-            Loading newswire
+            Loading newswire…
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-12 djup-section-label">
@@ -73,35 +83,37 @@ const NewsFeed = ({ limit = 12 }) => {
             No headlines available — set NEWSAPI_KEY or GNEWS_API_KEY
           </div>
         ) : (
-          <ul className="divide-y divide-[var(--djup-border)]">
+          <ul>
             {items.map((a, i) => (
               <li
                 key={a.url || i}
-                className="group relative border-l-2 border-transparent hover:border-[var(--djup-primary)] hover:bg-[var(--djup-bg-panel-elevated)] transition-colors"
+                className={`group relative border-b border-[var(--djup-border)] last:border-b-0 hover:bg-[var(--djup-bg-panel-elevated)] transition-colors`}
               >
+                <span className="absolute top-0 left-0 w-[2px] h-full bg-transparent group-hover:bg-[var(--djup-primary)] transition-colors" />
                 <a
                   href={a.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="block px-4 py-3 no-underline"
+                  className="block px-5 py-3.5 no-underline"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="djup-section-label text-[var(--djup-primary)]">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <span className="text-[11px] font-medium text-[var(--djup-primary)] tracking-wide">
                           {a.source || 'Wire'}
                         </span>
-                        <span className="djup-section-label">
+                        <span className="w-1 h-1 rounded-full bg-[var(--djup-text-faint)]" />
+                        <span className="text-[11px] text-[var(--djup-text-faint)]">
                           {formatRelative(a.publishedAt)}
                         </span>
                       </div>
-                      <h4 className="text-[13px] font-medium text-[var(--djup-text)] leading-snug group-hover:text-[var(--djup-primary-strong)] transition-colors line-clamp-2">
+                      <h4 className="text-[13.5px] text-[var(--djup-text)] leading-snug group-hover:text-[var(--djup-primary-strong)] transition-colors line-clamp-2">
                         {a.title}
                       </h4>
                     </div>
                     <ExternalLink
-                      className="w-3 h-3 text-[var(--djup-text-faint)] group-hover:text-[var(--djup-primary)] shrink-0 mt-1"
-                      strokeWidth={1.5}
+                      className="w-3.5 h-3.5 text-[var(--djup-text-faint)] group-hover:text-[var(--djup-primary)] shrink-0 mt-0.5 transition-colors"
+                      strokeWidth={1.75}
                     />
                   </div>
                 </a>

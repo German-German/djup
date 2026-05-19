@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Inbox } from 'lucide-react';
 
 export const EmptyState = ({
   title = 'No data available',
@@ -7,18 +8,23 @@ export const EmptyState = ({
   actionTo,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full min-h-[160px] border border-[var(--djup-border-strong)] bg-[var(--djup-bg-panel-elevated)] p-6 text-center">
-      <div className="djup-section-label text-[var(--djup-primary)] mb-3">Empty</div>
-      <h4 className="text-[13px] font-semibold text-[var(--djup-text)] font-['Inter'] mb-1">{title}</h4>
-      <p className="font-mono text-[var(--djup-text-muted)] text-[11px] max-w-[320px] leading-relaxed">
+    <div
+      className="flex flex-col items-center justify-center w-full h-full min-h-[200px] border border-[var(--djup-border-strong)] bg-[var(--djup-bg-panel-elevated)] px-6 py-10 text-center"
+      style={{ borderRadius: 'var(--r-md)' }}
+    >
+      <div className="w-10 h-10 mb-4 flex items-center justify-center rounded-full bg-[var(--djup-bg-panel)] text-[var(--djup-text-faint)]">
+        <Inbox size={18} strokeWidth={1.5} />
+      </div>
+      <h4 className="text-[14px] font-semibold text-[var(--djup-text)] mb-1.5">{title}</h4>
+      <p className="text-[12.5px] text-[var(--djup-text-muted)] max-w-[340px] leading-relaxed">
         {description}
       </p>
 
       {actionLabel && actionTo && (
         <Link
           to={actionTo}
-          className="mt-4 px-4 py-1.5 text-[11px] font-mono font-medium tracking-wider uppercase text-[var(--djup-bg-main)] bg-[var(--djup-primary)] hover:bg-[var(--djup-primary-strong)] transition-colors no-underline"
-          style={{ borderRadius: 0 }}
+          className="mt-5 px-5 py-2 text-[12.5px] font-medium text-[var(--djup-bg-main)] bg-[var(--djup-primary)] hover:bg-[var(--djup-primary-strong)] transition-colors no-underline"
+          style={{ borderRadius: 'var(--r-sm)' }}
         >
           {actionLabel}
         </Link>

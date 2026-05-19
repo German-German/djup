@@ -1,9 +1,10 @@
 import { ArrowUp, ArrowDown, Minus, Loader2 } from 'lucide-react';
 
-const KPICard = ({ label, value, delta, loading = false, highlight = false, unit }) => {
-  const isPositive = typeof delta === 'number' && delta > 0;
-  const isNegative = typeof delta === 'number' && delta < 0;
-  const deltaColor = isPositive
+const KPICard = ({ label, value, delta, loading = false, highlight = false, unit, hint }) => {
+  const hasDelta = typeof delta === 'number';
+  const isPositive = hasDelta && delta > 0;
+  const isNegative = hasDelta && delta < 0;
+  const deltaTone = isPositive
     ? 'text-[var(--djup-positive)]'
     : isNegative
     ? 'text-[var(--djup-negative)]'
@@ -11,40 +12,49 @@ const KPICard = ({ label, value, delta, loading = false, highlight = false, unit
 
   return (
     <div
-      className={`bg-[var(--djup-bg-panel)] border border-[var(--djup-border-strong)] p-4 flex flex-col relative ${
-        highlight ? 'border-l-2 border-l-[var(--djup-primary)]' : ''
-      }`}
-      style={{ borderRadius: 0 }}
+      className="bg-[var(--djup-bg-panel)] border border-[var(--djup-border-strong)] p-5 flex flex-col gap-4 relative"
+      style={{ borderRadius: 'var(--r-md)' }}
     >
-      <div className="djup-section-label mb-3">{label}</div>
+      {highlight && (
+        <span
+          className="absolute top-0 left-0 w-1 h-full"
+          style={{ background: 'var(--djup-primary)', borderTopLeftRadius: 'var(--r-md)', borderBottomLeftRadius: 'var(--r-md)' }}
+        />
+      )}
 
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="djup-section-label">{label}</div>
+
+      <div className="flex items-baseline justify-between gap-3 flex-wrap">
         {loading ? (
           <Loader2 className="w-5 h-5 text-[var(--djup-text-faint)] animate-spin" />
         ) : (
-          <div className="flex items-baseline gap-1.5 min-w-0">
-            <span className="text-[26px] font-mono font-semibold text-[var(--djup-text)] leading-none tracking-tight tabular-nums">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <span className="font-num text-[28px] font-semibold text-[var(--djup-text)] leading-none tabular-nums">
               {value}
             </span>
             {unit && (
-              <span className="text-[12px] font-mono text-[var(--djup-text-muted)] leading-none">{unit}</span>
+              <span className="text-[13px] text-[var(--djup-text-muted)] leading-none">{unit}</span>
             )}
           </div>
         )}
 
-        {!loading && delta !== undefined && delta !== null && (
-          <div className={`flex items-center gap-1 text-[11px] font-mono tabular-nums ${deltaColor}`}>
+        {!loading && hasDelta && (
+          <div className={`inline-flex items-center gap-1 text-[12px] font-medium tabular-nums ${deltaTone}`}>
             {isPositive ? (
-              <ArrowUp size={11} strokeWidth={2} />
+              <ArrowUp size={12} strokeWidth={2.4} />
             ) : isNegative ? (
-              <ArrowDown size={11} strokeWidth={2} />
+              <ArrowDown size={12} strokeWidth={2.4} />
             ) : (
-              <Minus size={11} strokeWidth={2} />
+              <Minus size={12} strokeWidth={2.4} />
             )}
             <span>{Math.abs(delta).toFixed(2)}%</span>
           </div>
         )}
       </div>
+
+      {hint && (
+        <div className="text-[12px] text-[var(--djup-text-faint)] leading-snug">{hint}</div>
+      )}
     </div>
   );
 };
